@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dynamic Polynomial Fit with ±3 Tolerance</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+    }
+    canvas {
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Dynamic Polynomial Regression (Degree 2) - ±3 Tolerance</h1>
+<label for="numModules">Enter Number of Modules:</label>
+<input id="numModules" type="number" min="5" max="50" value="10" />
+<button onclick="generateData()">Generate and Plot</button>
+
+<canvas id="myChart" width="800" height="400"></canvas>
+
+<script>
+/****************************************************************
+  1) GENERATE DYNAMIC DATA
+     Generate xData and yData based on the number of modules/tests.
+****************************************************************/
+let xData = [];
+let yData = [];
+
+function generateData() {
+  const numModules = parseInt(document.getElementById('numModules').value);
+  if (numModules < 5 || numModules > 50) {
+    alert("Please enter a number between 5 and 50.");
+    return;
+  }
+
+  // Generate xData (module indices) and yData (average grades)
+  xData = Array.from({ length: numModules }, (_, i) => i + 1); // [1, 2, ..., numModules]
+  yData = xData.map(x => {
+    const base = 12 + Math.sin(x / 2) * 3; // Generate a baseline sinusoidal trend
+    const noise = (Math.random() - 0.5) * 4; // Add random noise
+    return Math.max(0, Math.min(20, base + noise)); // Clamp to [0, 20]
+  });
+
+  // Add a few deliberate outliers
+  if (numModules > 5) {
+    yData[Math.floor(numModules / 3)] += 8;  // Add a high outlier
+    yData[Math.floor(numModules / 2)] -= 6; // Add a low outlier
+  }
+
+  plotChart(); // Re-plot the chart with the new data
+}
+
+/****************************************************************
+  2) POLYNOMIAL FIT (DEGREE=2)
+****************************************************************/
+
+function polyFit2(xs, ys) {
+  if (xs.length !== ys.length || xs.length < 3) {
+    throw new Error("Need at least 3 points for a quadratic fit!");
+  }
+
+  let n = xs.length;
+
+  // Compute summations
+  let sumX=0, sumX2=0, sumX3=0, sumX4=0;
+  let sumY=0, sumXY=0, sumX2Y=0;
+
+  for (let i = 0; i < n; i++) {
+    let x = xs[i];
+    let y = ys[i];
+    sumX   += x;
+    sumX2  += x*x;
+    sumX3  += x*x*x;
+    sumX4  += x*x*x*x;
+    sumY   += y;
+    sumXY  += x*y;
+    sumX2Y += x*x*y;
+  }
+
+  // Matrix M and vector b: M * coeffs = b
+  let M = [
+    [n,     sumX,  sumX2],
+    [sumX,  sumX2, sumX3],
+    [sumX2, sumX3, sumX4]
+  ];
+  let bVec = [sumY, sumXY, sumX2Y];
+
+  let Minv = invert3x3(M);
+  let cba = multiply3x3Vec(Minv, bVec); // [c, b, a]
+
+  // Return [a, b, c]
+  return [cba[2], cba[1], cba[0]];
+}
+
+function invert3x3(m) {
+  const det =
+     m[0][0]*(m[1][1]*m[2][2] - m[1][2]*m[2][1])
+   - m[0][1]*(m[1][0]*m[2][2] - m[1][2]*m[2][0])
+   + m[0][2]*(m[1][0]*m[2][1] - m[1][1]*m[2][0]);
+
+  if (Math.abs(det) < 1e-12) {
+    throw new Error("Matrix is singular or nearly singular!");
+  }
+
+  let invDet = 1 / det;
+  let inv = [[0,0,0],[0,0,0],[0,0,0]];
+
+  inv[0][0] =  (m[1][1]*m[2][2] - m[1][2]*m[2][1]) * invDet;
+  inv[0][1] = -(m[0][1]*m[2][2] - m[0][2]*m[2][1]) * invDet;
+  inv[0][2] =  (m[0][1]*m[1][2] - m[0][2]*m[1][1]) * invDet;
+
+  inv[1][0] = -(m[1][0]*m[2][2] - m[1][2]*m[2][0]) * invDet;
+  inv[1][1] =  (m[0][0]*m[2][2] - m[0][2]*m[2][0]) * invDet;
+  inv[1][2] = -(m[0][0]*m[1][2] - m[0][2]*m[1][0]) * invDet;
+
+  inv[2][0] =  (m[1][0]*m[2][1] - m[1][1]*m[2][0]) * invDet;
+  inv[2][1] = -(m[0][0]*m[2][1] - m[0][1]*m[2][0]) * invDet;
+  inv[2][2] =  (m[0][0]*m[1][1] - m[0][1]*m[1][0]) * invDet;
+
+  return inv;
+}
+
+function multiply3x3Vec(mat, vec) {
+  let out = [0,0,0];
+  for (let i=0; i<3; i++) {
+    out[i] = mat[i][0]*vec[0] + mat[i][1]*vec[1] + mat[i][2]*vec[2];
+  }
+  return out;
+}
+
+/****************************************************************
+  3) PLOT THE DATA
+****************************************************************/
+function plotChart() {
+  const [a, b, c] = polyFit2(xData, yData);
+  const threshold = 3;
+
+  let degradeX = [], degradeY = [];
+  let overX    = [], overY    = [];
+  let normalX  = [], normalY  = [];
+
+  for (let i = 0; i < xData.length; i++) {
+    let pred = a*xData[i]*xData[i] + b*xData[i] + c;
+    let diff = yData[i] - pred;
+
+    if (diff <= -threshold) {
+      degradeX.push(xData[i]);
+      degradeY.push(yData[i]);
+    } else if (diff >= threshold) {
+      overX.push(xData[i]);
+      overY.push(yData[i]);
+    } else {
+      normalX.push(xData[i]);
+      normalY.push(yData[i]);
+    }
+  }
+
+  const normalPoints  = normalX.map((x, i) => ({ x, y: normalY[i] }));
+  const degradePoints = degradeX.map((x, i) => ({ x, y: degradeY[i] }));
+  const overPoints    = overX.map((x, i) => ({ x, y: overY[i] }));
+
+  const minX = Math.min(...xData), maxX = Math.max(...xData);
+  let lineData = [];
+  for (let step = 0; step <= 50; step++) {
+    let tx = minX + (maxX - minX)*(step/50);
+    let ty = a*tx*tx + b*tx + c;
+    lineData.push({ x: tx, y: ty });
+  }
+
+  new Chart(document.getElementById('myChart').getContext('2d'), {
+    type: 'scatter',
+    data: {
+      datasets: [
+        { label: 'Normal Points (±3)', data: normalPoints, backgroundColor: 'blue' },
+        { label: 'Degrade (≥3 below)', data: degradePoints, backgroundColor: 'red', pointStyle: 'triangle' },
+        { label: 'Over (≥3 above)', data: overPoints, backgroundColor: 'green', pointStyle: 'rectRounded' },
+        { label: 'Polynomial Fit', data: lineData, type: 'line', borderColor: 'red', borderWidth: 2, tension: 0.4 }
+      ]
+    },
+    options: {
+      scales: {
+        x: { title: { display: true, text: 'Module/Test #' } },
+        y: { title: { display: true, text: 'Grade (0–20)' }, min: 0, max: 20 }
+      },
+      plugins: { title: { display: true, text: `Polynomial Fit: y = ${a.toFixed(2)}x² + ${b.toFixed(2)}x + ${c.toFixed(2)}` } }
+    }
+  });
+}
+</script>
+</body>
+</html>
