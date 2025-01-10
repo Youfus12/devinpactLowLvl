@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Schedule, Grades & Analytics</title>
+
+  <!-- 1) Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- 2) Our data, then logic -->
+  <script src="scheduleData.js"></script>
+  <script src="scheduleLogic.js"></script>
+  <link rel="stylesheet" href="style.css" >
+
+</head>
+<body>
+
+<h1>Class Schedule, Grade Report & Analytics</h1>
+
+<!-- SCHEDULE TABLE -->
+<h2>Randomly Generated Schedule</h2>
+<table id="tblSchedule"></table>
+
+<!-- GRADE REPORT TABLE -->
+<h2>Grade Report</h2>
+<table id="tblGrades" class="gradeTable"></table>
+
+<!-- ANALYTICS CHART -->
+<h2>Analytics: Module Grades (0–20)</h2>
+<canvas id="chartModules" width="600" height="400"></canvas>
+
+<script>
+  console.log("Starting main script...");
+
+  fillScheduleRandomly(schd);
+  console.log("After fillScheduleRandomly");
+
+  assignRandomGrades(assignedModules);
+  console.log("After assignRandomGrades");
+
+  displaySchedule("tblSchedule", schd);
+  console.log("After displaySchedule");
+
+  displayGradeReport("tblGrades", assignedModules);
+  console.log("After displayGradeReport");
+
+  plotModuleGrades("chartModules", assignedModules);
+  console.log("After plotModuleGrades");
+</script>
+
+</body>
+</html>
