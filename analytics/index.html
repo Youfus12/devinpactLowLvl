@@ -2,51 +2,70 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Schedule, Grades & Analytics</title>
+  <title>Schedule, Grades & Analytics (GA Version)</title>
 
-  <!-- 1) Chart.js -->
+  <!-- Chart.js for bar charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- 2) Our data, then logic -->
+  <!-- Our data, logic, and GA scripts -->
   <script src="scheduleData.js"></script>
   <script src="scheduleLogic.js"></script>
-  <link rel="stylesheet" href="style.css" >
+  <script src="scheduleGA.js"></script>
 
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Class Schedule, Grade Report & Analytics</h1>
+  <h1>Class Schedule, Grade Report & Analytics</h1>
 
-<!-- SCHEDULE TABLE -->
-<h2>Randomly Generated Schedule</h2>
-<table id="tblSchedule"></table>
+  <div class="buttons">
+    <button onclick="onRandomSchedule()">Generate Random Schedule</button>
+    <button onclick="onGeneticAlgorithm()">Run Genetic Algorithm</button>
+  </div>
 
-<!-- GRADE REPORT TABLE -->
-<h2>Grade Report</h2>
-<table id="tblGrades" class="gradeTable"></table>
+  <!-- SCHEDULE TABLE -->
+  <h2>Schedule</h2>
+  <table id="tblSchedule"></table>
 
-<!-- ANALYTICS CHART -->
-<h2>Analytics: Module Grades (0–20)</h2>
-<canvas id="chartModules" width="600" height="400"></canvas>
+  <!-- GRADE REPORT TABLE -->
+  <h2>Grade Report</h2>
+  <table id="tblGrades" class="gradeTable"></table>
 
-<script>
-  console.log("Starting main script...");
+  <!-- ANALYTICS CHART -->
+  <h2>Analytics: Module Grades (0–20)</h2>
+  <!-- Reduced canvas size here -->
+  <canvas id="chartModules" width="400" height="100"></canvas>
 
-  fillScheduleRandomly(schd);
-  console.log("After fillScheduleRandomly");
+  <script>
+    /**
+     * Generate a Random Schedule
+     */
+    function onRandomSchedule() {
+      assignedModules = {}; // reset
+      fillScheduleRandomly(schd);
+      assignRandomGrades(assignedModules);
+      displaySchedule("tblSchedule", schd);
+      displayGradeReport("tblGrades", assignedModules);
+      plotModuleGrades("chartModules", assignedModules);
+    }
 
-  assignRandomGrades(assignedModules);
-  console.log("After assignRandomGrades");
+    /**
+     * Run Genetic Algorithm
+     */
+    async function onGeneticAlgorithm() {
+      assignedModules = {}; // reset
+      const bestChromosome = await runGeneticAlgorithmSchedule();
+      chromosomeToSchedule(bestChromosome, schd);
+      assignRandomGrades(assignedModules);
+      displaySchedule("tblSchedule", schd);
+      displayGradeReport("tblGrades", assignedModules);
+      plotModuleGrades("chartModules", assignedModules);
+    }
 
-  displaySchedule("tblSchedule", schd);
-  console.log("After displaySchedule");
-
-  displayGradeReport("tblGrades", assignedModules);
-  console.log("After displayGradeReport");
-
-  plotModuleGrades("chartModules", assignedModules);
-  console.log("After plotModuleGrades");
-</script>
+    // On first load, generate a random schedule by default:
+    onRandomSchedule();
+  </script>
 
 </body>
 </html>

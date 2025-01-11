@@ -2,35 +2,58 @@ body {
   font-family: Arial, sans-serif;
   margin: 20px;
 }
+
 h1, h2 {
-  text-align: center;
+  color: #333;
+  margin-bottom: 0.5em;
 }
+
+.buttons {
+  margin-bottom: 1em;
+}
+
+button {
+  margin-right: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
 table {
-  margin: 20px auto;
   border-collapse: collapse;
-  min-width: 600px;
+  margin-bottom: 2em;
+  width: 100%;
 }
-th, td {
-  border: 2px solid #444;
+
+table, th, td {
+  border: 1px solid #999;
   padding: 8px 12px;
   text-align: center;
 }
+
+.gradeTable th {
+  background: #f2f2f2;
+}
+
 .moduleCell {
   font-weight: bold;
-  color: #006;
+  color: #007BFF;
 }
+
 .profCell {
+  color: #555;
   font-style: italic;
-  color: #333;
 }
-.gradeTable th {
-  background-color: #eef;
-}
-.gradeTable td {
-  border-color: #888;
-}
+
+/* Make canvas responsive or set a smaller max-width */
 canvas {
-  display: block;
-  margin: 0 auto;
-  max-width: 800px;
+  max-width: 500px;
+  height: auto !important; /* Ensure the height scales */
 }

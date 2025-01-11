@@ -1,18 +1,12 @@
-console.log("Loading scheduleLogic.js...");
-
 /*******************************************************
  * fillScheduleRandomly(schedule)
  *******************************************************/
 function fillScheduleRandomly(schedule) {
-  console.log("fillScheduleRandomly() called");
-
   schedule.days.forEach(daySlots => {
     for (let i = 0; i < daySlots.length; i++) {
       if (daySlots[i] === id.sess.lnch || daySlots[i] === id.sess.nose) {
-        // skip lunch/no_session
-        continue;
+        continue; // skip lunch / no_session
       }
-      // random module
       const mod = allModules[Math.floor(Math.random() * allModules.length)];
       const profs = professors.filter(p => p.canTeach.includes(mod.id));
       let chosenProf = "(No Prof)";
@@ -20,13 +14,10 @@ function fillScheduleRandomly(schedule) {
         chosenProf = profs[Math.floor(Math.random() * profs.length)].name;
       }
       daySlots[i] = `${mod.id}<br>${chosenProf}`;
-      // Track the module in assignedModules
+
+      // Track module in assignedModules
       if (!assignedModules[mod.id]) {
-        assignedModules[mod.id] = {
-          name: mod.name,
-          exam: 0,
-          test: 0
-        };
+        assignedModules[mod.id] = { name: mod.name, exam: 0, test: 0 };
       }
     }
   });
@@ -36,7 +27,6 @@ function fillScheduleRandomly(schedule) {
  * assignRandomGrades(modulesObj)
  *******************************************************/
 function assignRandomGrades(modulesObj) {
-  console.log("assignRandomGrades() called");
   for (let modId in modulesObj) {
     modulesObj[modId].exam = Math.floor(Math.random() * 21); // 0..20
     modulesObj[modId].test = Math.floor(Math.random() * 11); // 0..10
@@ -53,7 +43,7 @@ function RmDot(val) {
 
 function GetSessTime(keys, i) {
   let h = RmDot(
-    keys.start + 
+    keys.start +
     (keys.lidx === i ? i - 1 : i) * keys.sdur +
     (keys.lidx === i ? keys.lnch : keys.lidx < i ? -keys.sdur + keys.lnch : 0)
   );
@@ -64,7 +54,7 @@ function GetSessTime(keys, i) {
 
   i++;
   h = RmDot(
-    keys.start + 
+    keys.start +
     (keys.lidx === i ? i - 1 : i) * keys.sdur +
     (keys.lidx === i ? keys.lnch : keys.lidx < i ? -keys.sdur + keys.lnch : 0)
   );
@@ -76,8 +66,6 @@ function GetSessTime(keys, i) {
 }
 
 function displaySchedule(tblId, schedule) {
-  console.log("displaySchedule() called for table:", tblId);
-
   const tbl = document.getElementById(tblId);
   let html = "<tr><th>Days<br>Hours</th>";
 
@@ -106,17 +94,13 @@ function displaySchedule(tblId, schedule) {
     }
     html += "</tr>";
   }
-
   tbl.innerHTML = html;
 }
 
 /*******************************************************
  * displayGradeReport(tblId, modulesObj)
- * finalGrade = (exam + 2*test)/2 => 0..20
  *******************************************************/
 function displayGradeReport(tblId, modulesObj) {
-  console.log("displayGradeReport() called for table:", tblId);
-
   const tbl = document.getElementById(tblId);
   let html = `
     <tr>
@@ -131,7 +115,7 @@ function displayGradeReport(tblId, modulesObj) {
 
   for (let modId in modulesObj) {
     const m = modulesObj[modId];
-    const finalGrade = (m.exam + 2 * m.test) / 2; 
+    const finalGrade = (m.exam + 2 * m.test) / 2;
     html += `
       <tr>
         <td>${modId} - ${m.name}</td>
@@ -158,8 +142,6 @@ function displayGradeReport(tblId, modulesObj) {
  * plotModuleGrades(canvasId, modulesObj)
  *******************************************************/
 function plotModuleGrades(canvasId, modulesObj) {
-  console.log("plotModuleGrades() called for canvas:", canvasId);
-
   const labels = [];
   const dataPoints = [];
 
@@ -196,5 +178,3 @@ function plotModuleGrades(canvasId, modulesObj) {
     }
   });
 }
-
-console.log("Finished loading scheduleLogic.js");

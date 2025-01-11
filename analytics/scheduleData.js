@@ -1,5 +1,3 @@
-console.log("Loading scheduleData.js...");
-
 // IDs for day/session references
 const id = {
   day: {
@@ -28,32 +26,23 @@ const allModules = [
   { id: "PHYS201",name: "Physics II" }
 ];
 
-// Professors with modules they can teach
+// Professors
 const professors = [
-  {
-    name: "Dr. Jones",
-    canTeach: ["CS101", "CS102", "CS201", "CS202"]
-  },
-  {
-    name: "Dr. Brown",
-    canTeach: ["AI101"]
-  },
-  {
-    name: "Dr. Smith",
-    canTeach: ["MATH201", "PHYS201"]
-  }
+  { name: "Dr. Jones", canTeach: ["CS101", "CS102", "CS201", "CS202"] },
+  { name: "Dr. Brown", canTeach: ["AI101"] },
+  { name: "Dr. Smith", canTeach: ["MATH201", "PHYS201"] }
 ];
 
-// Our schedule skeleton (7 days × 5 timeslots)
+// Schedule skeleton (7 days × 5 timeslots)
 const schd = {
   keys: {
-    days: [1,2,3,4,5,6,7],   // => d1..d7
-    times: 5,               // 5 timeslots
-    start: 8.5,             // 8:30
-    end: 15.5,              // 15:30
-    sdur: 1.5,              // 1h30 per slot
-    lnch: 1,                // 1h lunch
-    lidx: 2                 // lunch at the 3rd slot
+    days: [1,2,3,4,5,6,7],  
+    times: 5, 
+    start: 8.5,   
+    end: 15.5,   
+    sdur: 1.5,   
+    lnch: 1,    
+    lidx: 2     
   },
   // Each day => 5 slots
   days: [
@@ -67,7 +56,5 @@ const schd = {
   ]
 };
 
-// We store assigned modules and their random grades here:
+// Store assigned modules and their grades
 let assignedModules = {}; 
-
-console.log("Finished loading scheduleData.js");
