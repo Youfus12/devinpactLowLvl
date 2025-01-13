@@ -1,0 +1,2487 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<link rel="icon" type="image/x-icon" href="images/school.ico?v=1.0">
+	<link rel="stylesheet" href="css/FontAwesome.min.css?v=1.0">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>School Platform</title>
+
+	<!-- update the version number as needed -->
+	<script src="js/jsQR.js?v=1.0"></script>
+	<script src="js/GeminiPro.js?v=1.0"></script>
+	<script defer src="/__/firebase/11.0.1/firebase-app-compat.js?v=1.0"></script>
+	<!-- include only the Firebase features as you need -->
+	<script defer src="/__/firebase/11.0.1/firebase-auth-compat.js?v=1.0"></script>
+	<script defer src="/__/firebase/11.0.1/firebase-database-compat.js?v=1.0"></script>
+	<script defer src="/__/firebase/11.0.1/firebase-storage-compat.js?v=1.0"></script>
+
+	<script defer src="/__/firebase/init.js?useEmulator=true"></script>
+
+	<style media="screen">
+		#overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, 0.6);
+			/* Dark semi-transparent background */
+			display: none;
+			/* Hidden by default */
+			justify-content: center;
+			align-items: center;
+		}
+
+		.overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, 0.6);
+			justify-content: center;
+			align-items: center;
+			display: flex;
+		}
+
+		.dialog {
+			background: white;
+			padding: 20px;
+			width: 90%;
+			max-width: 400px;
+			border-radius: 8px;
+			box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+			position: relative;
+			text-align: center;
+		}
+
+		/* Dialog box */
+		#dialog {
+			background: white;
+			padding: 20px;
+			width: 90%;
+			max-width: 400px;
+			border-radius: 8px;
+			box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+			position: relative;
+			text-align: center;
+		}
+
+		/* Close button */
+		.close-btn {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			cursor: pointer;
+			font-size: 20px;
+			font-weight: bold;
+			color: #333;
+			border: none;
+			background: none;
+		}
+
+		/* Optional open button styling */
+		#open-dialog {
+			margin-top: 20px;
+			padding: 10px 20px;
+			font-size: 16px;
+			cursor: pointer;
+			background-color: #007BFF;
+			color: white;
+			border: none;
+			border-radius: 5px;
+		}
+
+		.icon {
+			color: white;
+			
+		}
+
+		.ctxOpt {
+			width: 20px;
+			text-align: center;
+			align-content: center;
+		}
+
+		@keyframes backgradient {
+			0% {
+				background-position: 0% 50%;
+			}
+
+			50% {
+				background-position: 100% 50%;
+			}
+
+			100% {
+				background-position: 0% 60%;
+			}
+		}
+
+		body {
+			background: linear-gradient(-45deg, #271745, #271636, #3f2a97, #271646);
+			background-size: 400% 400%;
+			animation: backgradient 7s ease infinite;
+			color: rgba(0, 0, 0, 0.87);
+			font-family: Roboto, Helvetica, Arial, sans-serif;
+			margin: 0;
+			padding: 0;
+		}
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			scrollbar-width: none;
+			-webkit-user-drag: none;
+
+			-webkit-user-select: none;
+			/* Safari, Chrome */
+			-moz-user-select: none;
+			/* Firefox */
+			-ms-user-select: none;
+			/* IE10+ */
+			user-select: none;
+			transition: opacity 0.3s ease;
+			overflow: hidden;
+		}
+
+		.draggable {
+			-webkit-user-drag: auto;
+		}
+
+		.selectable {
+			-webkit-user-select: text !important;
+			/* Safari, Chrome */
+			-moz-user-select: text !important;
+			/* Firefox */
+			-ms-user-select: text !important;
+			/* IE10+ */
+			user-select: text !important;
+		}
+
+		body,
+		html {
+			height: 100%;
+			font-family: 'Courier New', Courier, monospace;
+			font-weight: bold;
+			display: flex;
+			flex-direction: column;
+		}
+
+		#center {
+			position: flex;
+			/* fixed */
+			/*margin-top: 12vh;*/
+
+			width: 100%;
+			height: 83%;
+			/*margin-bottom: 7vh;*/
+			display: flex;
+			/* Optional: for centering child */
+			align-items: center;
+			/* Optional: vertically center child */
+			justify-content: center;
+		}
+
+		.header {
+			position: flex;
+			/* fixed */
+			font-size: clamp(8px, 2vw, 20px);
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 12%;
+			background-color: #333333bd;
+			color: white;
+			display: flex;
+			align-items: center;
+			padding-left: 2%;
+			justify-content: left;
+			/*border-bottom-right-radius: 4rem 4rem;*/
+			box-shadow: 0.1rem 0.1rem 1.5rem 0.2rem #271636
+		}
+
+		#stdName {
+			margin-left: auto;
+			margin-right: 10%;
+			position: relative;
+			color: #ededed;
+			font-size: clamp(15px, 2.5vw, 20px);
+			font-weight: bold;
+		}
+
+		#users{
+			overflow-y: auto;
+		}
+
+		.footer {
+			position: flex;
+			font-size: clamp(10px, 2.5vw, 20px);
+			bottom: 0;
+			left: 0;
+			width: 100%;
+			height: 5%;
+			background-color: #3333331d;
+			color: white;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			/*border-top-right-radius: 7rem 3.5rem;
+			box-shadow: 0.1rem 0.1rem 0.5rem 0.1rem #c3f303*/
+		}
+
+		main {
+			overflow: auto;
+		}
+
+		button {
+			padding: 10px 20px;
+			font-size: clamp(10px, 2vw, 20px);
+			font-family: 'Arial', sans-serif;
+			border: none;
+			outline: none;
+			cursor: pointer;
+			position: relative;
+			background-color: transparent;
+			color: #fff;
+			border-radius: 8px;
+			transition: transform 0.3s ease;
+			overflow: hidden;
+			box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+		}
+
+		/* Glowing animated text effect */
+		button::before {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(45deg, #00ff00, #00ffcc, #ff00ff, #ffcc00);
+			background-size: 400% 400%;
+			animation: glowingText 4s linear infinite;
+			z-index: -1;
+			/* Places it behind the text */
+			filter: blur(8px);
+			opacity: 0.8;
+		}
+
+		/* Animation for colorful glowing text */
+		@keyframes glowingText {
+			0% {
+				background-position: 0% 50%;
+			}
+
+			50% {
+				background-position: 100% 50%;
+			}
+
+			100% {
+				background-position: 0% 50%;
+			}
+		}
+
+		/* Button hover effect */
+		button:hover {
+			transform: scale(1.1);
+			box-shadow: 0 0 15px rgba(0, 255, 0, 0.7), 0 0 20px rgba(0, 255, 0, 0.7);
+		}
+
+		#admin-link {
+			display: none;
+		}
+
+		.wave-background {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(270deg, #c3f303, #c3f303, #c3f303, #bbd651);
+			background-size: 200% 200%;
+			animation: waveAnimation 5s ease-in-out infinite;
+		}
+
+		/* Keyframes for the wave animation */
+		@keyframes waveAnimation {
+			0% {
+				background-position: 0 0;
+			}
+
+			50% {
+				background-position: 100% 100%;
+			}
+
+			100% {
+				background-position: 0 0;
+			}
+		}
+
+		.sidebar {
+			display: flex;
+			position: fixed;
+			z-index: 10000;
+			top: 12%;
+			left: 0;
+			width: 100%;
+			height: 8%;
+			/*calc(81vh - 0rem)*/
+			background-color: #3a165a4f;
+			color: white;
+			padding-top: 5px;
+			overflow-y: auto;
+			/*box-shadow: 0.1rem 0.1rem 0.5rem 0.1rem #c3f30395;*/
+			pointer-events: none;
+			opacity: 0.5;
+			border-bottom-left-radius: 20px;
+			border-bottom-right-radius: 20px;
+			transition: transform 0.3s ease, opacity 0.5s ease;
+			transform-origin: top;
+			/* Pivot point for scaling */
+			transform: scaleY(0);
+			text-align: center;
+			align-content: center;
+		}
+
+		.sidebar a {
+			display: block;
+			color: white;
+			margin-bottom: 10px;
+			padding: 5px;
+			background-color: #55555524;
+			text-decoration: none !important;
+			border-radius: 10px;
+			font-weight: bolder;
+			font-size: clamp(8px, 1.3vw, 20px);
+			break-inside: avoid;
+			width: 11%;
+			margin-left: 1%;
+			opacity: 1;
+			
+		}
+
+		.sidebar a:hover {
+			background-color: #7777774f;
+			filter: brightness(100);
+			padding-bottom: 20px;
+		}
+
+		.sidebar .titles{
+			align-content: center;
+		}
+
+
+		.validate {
+			width: 100%;
+			padding: 10px;
+			background-color: #4CAF50;
+			color: white;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			transition: transform 0.2s ease-in-out;
+		}
+
+		.validate:hover {
+			transform: scale(1.01);
+		}
+
+		.content {
+			position: fixed;
+			/*margin-left: 14%;*/
+			width: 100%;
+			height: 81vh;
+			overflow: auto;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		video {
+			width: 100%;
+			height: auto;
+			border: 1px solid black;
+		}
+
+		canvas {
+			position: absolute;
+			top: 0;
+			left: 0;
+			pointer-events: none;
+			/* Prevent the canvas from blocking user interactions */
+			z-index: 1;
+		}
+
+
+		#load {
+			color: rgba(0, 0, 0, 0.4);
+			text-align: center;
+			font-size: 13px;
+		}
+
+		#scard {
+			width: 30%;
+			margin-left: 35%;
+			margin-top: 10px;
+			margin-bottom: 10px;
+			transition: transform 0.2s ease-in-out;
+		}
+
+		#scard:hover {
+			transform: scale(1.1);
+		}
+
+		@keyframes glowGreen {
+			0% {
+				filter: drop-shadow(0 0 0.1rem rgb(225, 255, 0));
+				/*rgba(0, 255, 0, 0.5)*/
+			}
+
+			50% {
+				filter: drop-shadow(0 0 0.7rem rgba(255, 255, 0, 0.8));
+			}
+
+			100% {
+				filter: drop-shadow(0 0 0.1rem rgba(255, 255, 0, 0.5));
+			}
+		}
+
+		.glowing-ncs {
+			width: auto;
+			height: 80%;
+			animation: glowGreen 2s infinite;
+		}
+
+		.glowing-nit {
+			/*width: 20px;*/
+			width: auto;
+			height: 80%;
+
+			animation: glowWhite 5s infinite;
+		}
+
+		@keyframes glowWhite {
+			0% {
+				filter: drop-shadow(0 0 0.2rem rgb(255, 255, 4));
+				/*rgba(0, 255, 0, 0.5)*/
+			}
+
+			50% {
+				filter: drop-shadow(0 0 0.9rem rgb(146, 146, 146));
+			}
+
+			100% {
+				filter: drop-shadow(0 0 0.2rem rgba(255, 255, 255, 0.882));
+			}
+		}
+
+
+
+		/* Sign-in container */
+		.sign-in-container {
+			overflow-y: auto;
+			background-color: rgba(255, 255, 255, 0.1);
+			padding: 2em;
+			border-radius: 2rem;
+			box-shadow: 0 1em 2em rgba(0, 0, 0, 0.1);
+			/*box-shadow: inset 0 0 10px 20px rgb(228, 6, 6);
+			position: relative;
+			mask-image: radial-gradient(rectangle, black 70%, transparent 100%);
+			mask-image: linear-gradient(white, white),
+				linear-gradient(white, white),
+				linear-gradient(to bottom, black 10%, transparent 100%),
+				linear-gradient(to bottom, transparent 0%, black 90%);
+			mask-composite: exclude;
+			mask-size: 100% 100%;
+			mask-position: center;
+			mask-repeat: no-repeat;*/
+			z-index: 1000;
+			width: 60%;
+			height: 95%;
+			position: relative;
+			pointer-events: auto;
+			display: flex;
+			flex-direction: column;
+			/* Or 'row' if horizontal */
+			align-items: center;
+			/* Center buttons horizontally */
+			justify-content: flex-start;
+			display: none;
+		}
+
+		.sign-in-container p {
+			font-size: clamp(12px, 2vw, 20px);
+		}
+
+		/* Title */
+		h2 {
+			text-align: center;
+			margin-bottom: 20px;
+			font-size: clamp(18px, 2.5vw, 36px);
+			color: #ffffff;
+		}
+
+		/* Form fields */
+		.form-group {
+			margin-bottom: 15px;
+			overflow: visible;
+		}
+
+		.form-group label {
+			font-size: 120%;
+			color: #f0f0f0;
+			margin-bottom: 5px;
+			font-size: clamp(10px, 2.5vw, 20px);
+			display: block;
+		}
+
+		.form-group input {
+			width: 100%;
+			padding: 10px;
+			font-size: clamp(10px, 2.5vw, 20px);
+
+			border: 1px solid #ccc;
+			border-radius: 4px;
+		}
+
+		#sectn {
+			width: 100%;
+			height: auto;
+			font-weight: bold;
+
+		}
+
+		.textField {
+			pointer-events: auto;
+			position: relative;
+			width: 100%;
+			padding: 10px;
+			font-size: clamp(10px, 2.5vw, 20px);
+			border: 1px solid #ccc;
+			border-radius: 4px;
+			transition: transform 0.3s ease-in-out;
+			color: #ffffff;
+		}
+
+		.textField:focus,
+		.textField:hover {
+			transform: scale(1.05);
+		}
+
+		.textProp {
+			pointer-events: auto;
+			position: relative;
+			transition: transform 0.3s ease-in-out;
+		}
+
+		.textProp:hover {
+			color: rgb(30, 143, 255);
+			transform: scale(1.05);
+		}
+
+		/* Image buttons container */
+		.image-buttons {
+			display: flex;
+			justify-content: space-between;
+			margin-top: 20px;
+			margin-bottom: 20px;
+			text-align: center;
+		}
+
+		.image-buttons img {
+			width: 48%;
+			cursor: pointer;
+			border-radius: 4px;
+			transition: transform 0.2s ease-in-out;
+		}
+
+		.image-buttons img:hover {
+			transform: scale(1.1);
+		}
+
+		.text-white {
+			color: #f7f7f7;
+		}
+
+		.text-black {
+			color: #000000;
+		}
+
+		.back-transp {
+			background-color: transparent;
+		}
+
+		label {
+			color: #f7f7f7;
+		}
+
+		#quiztxt{
+			text-align: justify;
+		}
+
+		.fas {
+			text-align: center;
+			vertical-align: middle;
+			align-content: center;
+		}
+
+		#qr-scanner {
+			position: relative;
+			width: 100%;
+			max-width: 100%;
+			overflow: hidden;
+		}
+
+		video {
+			width: 100%;
+			border-radius: 8px;
+			transform: scaleX(-1);
+		}
+
+		canvas {
+			display: none;
+		}
+
+		.scan-area {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: 30vh;
+			height: 30vh;
+			border: 4px solid lime;
+			box-sizing: border-box;
+			border-radius: 8px;
+		}
+
+		#output {
+			margin-top: 20px;
+			text-align: center;
+		}
+
+		#toggle-camera {
+			margin-top: 10px;
+			padding: 10px;
+			font-size: 16px;
+			cursor: pointer;
+			background-color: #007BFF;
+			color: white;
+			border: none;
+			border-radius: 5px;
+		}
+
+		#toggle-camera:hover {
+			transform: scale(1.1);
+		}
+
+		@media (max-width: 1110px) {
+
+			/** {
+        color: red;
+      }*/
+			html {
+				width: 100%;
+				height: 100%
+			}
+
+			.sidebar a {
+				padding: 2px;
+				width: clamp(20px, 5vw, 40px);
+				background-color: #007bff00;
+				transition: transform 0.2s ease-in-out;
+				align-content: center;
+			}
+
+
+			.sidebar a:hover {
+				background-color: #7777774f;
+				filter: brightness(200);
+				transform: scale(1.01);
+			}
+
+			.sidebar .titles {
+				display: none;
+			}
+
+			.icon {
+				font-size: clamp(8px, 12vw, 20px);
+				padding: 10px;
+			}
+
+			.icon :active,
+			.icon :hover {
+				color: #ff00ff;
+			}
+
+			.sign-in-container {
+				width: 70%;
+			}
+
+			#scard {
+				width: 50%;
+				margin-left: 25%;
+			}
+
+			#quizes {
+				width: 90%;
+			}
+		}
+
+		#report {
+			display: none;
+		}
+
+		#ncsn {
+			display: none;
+		}
+
+		#quizes {
+			display: none;
+		}
+
+		.studrow {
+			border-radius: 10px;
+			transition: transform 0.2s ease-in-out;
+
+		}
+
+		.studrow:hover {
+			transform: scale(1.05);
+		}
+
+		#docs {
+			width: 95%;
+			display: none;
+			
+		}
+
+		#docTbl {
+			border-radius: 20px;
+			border-collapse: separate;
+			border: 0px;
+			color: #c6c6c6;
+		}
+
+		#docTbl th {
+			border: 0px;
+			border-radius: 20px;
+		}
+
+		#docTbl tr {
+			border-radius: 20px;
+		}
+
+		#docTbl td {
+			border-radius: 5px;
+			text-align: center;
+			justify-content: center;
+		}
+
+		#docTbl img {
+			height: 10vh;
+		}
+
+		#fname {
+			font-weight: bolder;
+			font-size: larger;
+		}
+
+		#fname:hover {
+			text-shadow: -1px 1px 5px greenyellow;
+			color: #c1dfff;
+		}
+
+		#upload {
+			background-color: rgb(255, 153, 0);
+		}
+
+		#admin {
+			width: 95%;
+		}
+
+		#users {
+			width: 100%;
+			border-radius: 10px;
+			border: 0px;
+		}
+
+		#users th {
+			border: 0px;
+		}
+
+		#users td {
+			/*height: 5vh;*/
+			text-align: center;
+			border-radius: 10px;
+		}
+
+		#users #icons {
+			border: 0px;
+			background-color: rgba(255, 255, 255, 0);
+		}
+
+		#signin-types {
+			width: 100%;
+			text-align: center;
+			margin-bottom: 5%;
+		}
+
+		#signin-types button {
+			width: 50%;
+			border-radius: 20px;
+			font-weight: bolder;
+			margin: 2px;
+		}
+
+		#btn-signup {
+			display: none;
+			background-color: #17c42ba5;
+		}
+
+		#btn-signin {
+			display: inline;
+			background-color: #007bffa5;
+		}
+
+		#btn-token {
+			display: inline;
+			background-color: #8c00ffa5;
+
+		}
+
+		#fild-signin {
+			display: none;
+		}
+
+		#fild-token {
+			display: none;
+		}
+
+		.studrow-male {
+			background-color: rgba(87, 177, 255, 0.351);
+		}
+
+		.studrow-fmale {
+			background-color: rgba(255, 87, 202, 0.351);
+		}
+
+		#inpUpld {
+			display: none;
+		}
+
+		.progress-container {
+			width: 100%;
+			/*max-width: 600px;*/
+			height: 10px;
+			background: #e0e0e0;
+			border-radius: 5px;
+			overflow: hidden;
+			position: relative;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+		}
+
+		#progress-container {
+			display: none;
+		}
+
+		.progress-bar {
+			height: 100%;
+			width: 0%;
+			background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+			background-size: 400% 100%;
+			animation: progressColor 3s linear infinite;
+			transition: width 0.3s ease;
+		}
+
+		@keyframes progressColor {
+			0% {
+				background-position: 0% 0%;
+			}
+
+			100% {
+				background-position: 100% 0%;
+			}
+		}
+
+		.progress-text {
+			margin-top: 10px;
+			text-align: center;
+			font-size: large;
+			font-weight: bolder;
+			color: #333;
+			display: none;
+		}
+
+		.qzans {
+			background-color: #21c527ab !important;
+			margin-bottom: 10px !important;
+			font-weight: bold;
+		}
+
+		.qzans::before {
+			animation: none !important;
+		}
+
+		.qzans:hover {
+			box-shadow: 0 0 10px 10px rgba(1, 255, 1, 0.684);
+		}
+
+		.qzans-crc {
+			box-shadow: 0 0 10px 10px rgba(1, 81, 255, 0.684);
+			pointer-events: none;
+		}
+
+		.qzans-err {
+			box-shadow: 0 0 10px 10px rgba(255, 1, 1, 0.684);
+			pointer-events: none;
+		}
+
+		.qzrange {
+			padding: 0 !important;
+			color: #f7f7f7;
+		}
+
+		#wifi {
+			margin-right: 2%;
+		}
+
+		.context-menu {
+			display: none;
+			position: absolute;
+			background-color: rgba(255, 255, 255, 0.95);
+			border: 1px solid #ccc;
+			border-radius: 15px;
+			box-shadow: -3px 3px 10px 5px rgba(0, 0, 0, 0.1);
+			z-index: 1000;
+			opacity: 0;
+
+		}
+
+		.context-menu ul {
+			list-style: none;
+			border-radius: 15px;
+			margin: 0;
+			padding: 0;
+		}
+
+		.context-menu ul li {
+			padding: 8px 12px;
+			border-radius: 15px;
+			cursor: pointer;
+		}
+
+		.context-menu ul li:hover {
+			border-radius: 15px;
+			background-color: #f0f0f0;
+			text-shadow: 0 0 2px #c1c1c1,
+				0 0 5px #7aec93,
+				0 0 10px #00ff1a,
+				0 0 15px #00ff99,
+				0 0 20px #7bcaff;
+		}
+
+		.warnBox {
+			position: fixed;
+			right: 6vh;
+			bottom: 10vh;
+			border-radius: 5px;
+			padding: 7px;
+			width: auto;
+			height: auto;
+			background: rgba(255, 255, 255, 0.6);
+			box-shadow: -3px 3px 10px 5px rgba(0, 0, 0, 0.123);
+			justify-content: center;
+			align-items: center;
+			z-index: 1000;
+			display: none;
+			opacity: 0;
+		}
+
+		#btnLogout {
+			width: 30%;
+			margin-left: 35%;
+			background-color: red;
+		}
+
+		#reportArea{
+			background-color: #00000085;
+		}
+
+		/*.files {
+			box-shadow: 0 0 5px 5px rgb(60, 60, 60);
+		}*/
+	</style>
+</head>
+
+<body>
+	<header class="header">
+		<img src="images/school.png?v=1.0" alt="" id="nit" class="glowing-nit" title="NIT" onclick="nit()">&emsp;
+		<h3>Students Platform</h3><span id="stdName"></span>
+	</header>
+	<nav></nav>
+	<div id="center">
+		<div id="overlay">
+			<div id="dialog">
+				<button type="button" onclick="alert('dialog')">×</button>
+				<input type="button" onclick="alert('dialog')" value="y">
+				<h2>Dialog Title</h2>
+				<p>This is a sample overlay dialog. You can put any content here.</p>
+			</div>
+		</div>
+		<aside class="sidebar" id="sidebar">
+			<a href="#home" onclick="menu('home')"><span class="fas fa-home icon"></span>&nbsp;<span
+					class="titles">Home</span></a>
+			<a href="#admin" onclick="menu('admin')" id="admin-link"><span
+					class="fas fa-shield-halved icon"></span>&nbsp;<span class="titles">Admin</span></a>
+			<a href="#inbox" onclick="menu('inbox')"><span class="fas fa-inbox icon"></span>&nbsp;<span
+					class="titles">Inbox</span></a>
+			<a href="#quizes" onclick="menu('quizes')"><span class="fas fa-puzzle-piece icon"></span>&nbsp;<span
+					class="titles">Quizes</span></a>
+			<a href="#community" onclick="menu('community')"><span class="fas fa-people-group icon"></span>&nbsp;<span
+					class="titles">Community</span></a>
+			<a href="#store" onclick="menu('store')"><span class="fas fa-store icon"></span>&nbsp;<span
+					class="titles">Store</span></a>
+			<a href="#report" onclick="menu('report')"><span class="fas fa-flag icon"></span>&nbsp;<span
+					class="titles">Report</span></a>
+			<a href="#" onclick="menu('settings')"><span class="fas fa-gear icon"></span>&nbsp;<span
+					class="titles">Settings</span></a>
+		</aside>
+
+		<main class="content" id="content">
+
+			<div class="sign-in-container" id="sign-in-container">
+				<div id="signin-types">
+					<button class="validate" id="btn-signup">Sign Up</button>
+					<button class="validate" id="btn-signin">Sign In</button>
+					<button class="validate" id="btn-token">Use Token</button>
+
+				</div>
+				<form id="signinForm">
+					<div id="fild-signup">
+						<h2>Sign Up</h2>
+						<p>Please scan your Student card (press the Card below) or type your informations manually</p>
+						<img id="scard" src="images/scard.png?v=1.0" alt="" onclick="scanQR(true)">
+
+						<div class="form-group">
+							<label for="fname">Family Name<span style="color: red;">*</span></label>
+							<input type="text" class="textField" id="fname" name="fname"
+								placeholder="Enter your Family Name" required>
+						</div>
+
+						<div class="form-group">
+							<label for="name">Name<span style="color: red;">*</span></label>
+							<input type="text" class="textField" id="name" name="name" placeholder="Enter your Name"
+								required>
+						</div>
+
+						<div class="form-group">
+							<label for="stdid">Student ID<span style="color: red;">*</span></label>
+							<input type="number" class="textField" id="stdid" name="stdid"
+								placeholder="Enter your Student ID (Matricule)" minlength="12" maxlength="12" required>
+						</div>
+
+						<div class="form-group">
+							<label for="sectn">Section<span style="color: red;">*</span></label>
+							<select name="" id="sectn" class="textField">
+								<!--<optgroup label="L1">-->
+								<option value="00" style="font-weight: bolder;">L1</option>
+								<!--<option value="01">B</option>
+                            </optgroup>-->
+								<optgroup label="L2">
+									<option value="10" style="font-weight: bold;">A</option>
+									<option value="11" style="font-weight: bold;">B</option>
+								</optgroup>
+								<optgroup label="L3">
+									<option value="20" style="font-weight: bold;">Cybersecurity</option>
+									<option value="21" style="font-weight: bold;">Artificial Intillegence</option>
+								</optgroup>
+							</select>
+						</div>
+
+						<div class="form-group">
+							<label for="birth">Date of Birth<span style="color: red;">*</span></label>
+							<input type="date" class="textField" id="birth" name="birth"
+								placeholder="Enter your Date of Birth" required>
+						</div>
+
+						<div class="form-group">
+							<label for="gendr">Gender<span style="color: red;">*</span></label>
+							<select name="" id="gendr" class="textField">
+								<option value="0">Man</option>
+								<option value="1">Woman</option>
+							</select>
+						</div>
+
+						<div class="form-group">
+							<label for="dscrd">Discord Username<span
+									style="color: orange;font-size: 80%;"><sub>(Optional
+										for
+										Community)</sub></span></label>
+							<input type="text" class="textField" id="dscrd" name="dscrd"
+								placeholder="Enter your Discord Username">
+						</div>
+
+						<div class="form-group">
+							<label for="phone">Phone number <span style="font-size: 80%;"><sub
+										style="color:green">(Optional)</span></sub></label>
+							<input type="tel" class="textField" id="phone" name="phone" minlength="0" maxlength="10"
+								placeholder="Enter your Phone number">
+						</div>
+						<button type="submit" class="validate" id="validate">Validate</button>
+					</div>
+					<div id="fild-signin">
+						<h2>Sign In</h2>
+						<div class="image-buttons" id="image-buttons">
+							<img src="images/google.png?v=1.0" alt="" id="google" onclick="loginAuth('Google')">
+							<img src="images/github.png?v=1.0" alt="" id="github" onclick="loginAuth('Github')">
+						</div>
+					</div>
+					<div id="fild-token">
+						<h2>Use Token</h2>
+						<div class="form-group">
+
+							<input type="text" class="textField" id="txtToken" placeholder="Enter your token"><br><br>
+							<button type="submit" class="validate" id="checkToken" onclick="checkToken()">Check</button>
+
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="sign-in-container" id="docs">
+				<h2>Documents</h2>
+				<div class="form-group">
+					<table class="textField" border="4" id="docTbl"></table>
+				</div>
+				<div class="form-group">
+					<label for="subjc">Subject</label>
+					<select name="" id="subjc" class="textField text-black"></select>
+				</div>
+				<div class="form-group" id="doctp">
+					<label for="doct">Type</label>
+					<select name="" id="doct" class="textField text-black">
+						<option value="">All</option>
+						<option value="Cour">Course</option>
+						<option value="TDTP">TD & TP</option>
+						<option value="Prog">Program</option>
+						<option value="Code">Code/Script</option>
+						<option value="Corr">Correction</option>
+						<option value="Extr">Extra</option>
+
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="semst">Semester</label>
+					<select name="" id="semst" class="textField text-black">
+						<optgroup label="L1">
+							<option value="00">S1</option>
+							<option value="01">S2</option>
+						</optgroup>
+						<optgroup label="L2">
+							<option value="10">S3</option>
+							<option value="11">S4</option>
+						</optgroup>
+						<optgroup label="L3: Cybersecurity">
+							<option value="20">S5</option>
+							<option value="21">S6</option>
+						</optgroup>
+						<optgroup label="L3: Artificial Intillegence">
+							<option value="30">S5</option>
+							<option value="31">S6</option>
+						</optgroup>
+					</select>
+				</div>
+				<button type="submit" class="validate" id="upload"
+					onclick="(function(){document.getElementById('inpUpld').click()})()">
+					<span class="fas fa-upload"></span>&nbsp;Upload</button>
+				<input type="file" name="" id="inpUpld">
+				<div class="progress-container" id="progress-container">
+					<div class="progress-bar" id="progressBar"></div>
+				</div>
+				<div class="progress-text" id="progressText">0%</div>
+
+
+			</div>
+
+
+			<div class="sign-in-container" id="admin">
+				<h2>Admin</h2>
+				<div class="form-group">
+					<table id="users" class="text-white" border="2"></table>
+				</div>
+			</div>
+			<div class="sign-in-container" id="quizes">
+				<h2>Quizes</h2>
+				<div class="form-group">
+					<label for="categ">Category</label>
+					<input list="catlst" type="text" class="textField back-transp" id="categ" value="Cybersecurity"
+						placeholder="Category" onchange="main.quiz.rqstQ(true)" />
+					<datalist id="catlst"></datalist>
+					<label for="difc">Difficulty</label>
+					<input type="range" class="textField qzrange" id="difc" min="1" max="10000" value="155"
+						oninput="(function(val){document.getElementById('qzdif').innerHTML=val})(this.value)">
+					<label for="nqst">Number of Questions</label>
+					<input type="range" class="textField qzrange" id="nqst" min="1" max="100" value="20"
+						oninput="(function(val){document.getElementById('qzsttl').innerHTML=val})(this.value)">
+					<label for="quiztxt">Question [<span id="dqst">1</span>/<span id="qzsttl">1</span>]: (Difficulty:
+						<span id="qzdif">1</span>)</label>
+					<p class="textField" id="quiztxt" style="min-height: 35vh;"></p><br>
+					<button id="quizsn1" onclick="main.quiz.loadQ(1)" class="validate qzans"><span
+							class="fas fa-paper-plane"></span>&nbsp;Answer 1</button>
+					<button id="quizsn2" onclick="main.quiz.loadQ(2)" class="validate qzans"><span
+							class="fas fa-paper-plane"></span>&nbsp;Answer 2</button>
+					<button id="quizsn3" onclick="main.quiz.loadQ(3)" class="validate qzans"><span
+							class="fas fa-paper-plane"></span>&nbsp;Answer 3</button>
+					<button id="quizsn4" onclick="main.quiz.loadQ(4)" class="validate qzans"><span
+							class="fas fa-paper-plane"></span>&nbsp;Answer 4</button>
+					<!--this.parentElement.firstElementChild.value-->
+				</div>
+			</div>
+			<div class="sign-in-container" id="store">
+				<h2>Store</h2>
+				<div class="form-group">
+					<textarea class="textField" placeholder="Write anything here..." id="storetxt"
+						style="min-height: 35vh;"></textarea>
+				</div>
+			</div>
+			<div class="sign-in-container" id="community">
+				<h2>Community</h2>
+				<div class="form-group">
+					<textarea class="textField" placeholder="Write anything here..." id="ncstxt"
+						style="min-height: 35vh;"></textarea>
+				</div>
+			</div>
+			<div class="sign-in-container" id="inbox">
+				<h2>Inbox</h2>
+				<div class="form-group">
+					<textarea class="textField" placeholder="Write anything here..." id="inboxtxt"
+						style="min-height: 35vh;"></textarea>
+				</div>
+			</div>
+			<div class="sign-in-container" id="report">
+				<h2>Report</h2>
+				<div class="form-group">
+					<textarea id="reportArea" class="textField" placeholder="Please describe your problem here..."
+						style="min-height: 35vh;"></textarea><br>
+					<button class="validate" onclick="report(this.parentElement.firstElementChild.value)"><span
+							class="fas fa-paper-plane"></span>&nbsp;Send</button>
+				</div>
+			</div>
+			<div class="sign-in-container" id="settings">
+				<h2>Settings</h2>
+				<div class="form-group">
+					<button class="validate" onclick="report(this.parentElement.firstElementChild.value)"
+						id="btnLogout"><span class="fas fa-power-off"></span>&nbsp;Log out</button>
+				</div>
+			</div>
+	</div>
+	</main>
+	</div>
+	<footer class="footer" id="footer">
+		<img id="ncs" src="images/school.png?v=1.0" alt="Icon" class="glowing-ncs" title="School">
+		&nbsp;&nbsp;&nbsp;<p><b>&copy; 2024 All Rights Reserved</b></p>
+	</footer>
+	<script>
+		var navmenu = document.getElementById("sidebar")
+		document.getElementsByTagName("header")[0].addEventListener("mouseover", function () {
+			navmenu.style.transform = "scaleY(1)";
+		})
+		document.getElementsByTagName("header")[0].addEventListener("mouseleave", function () {
+			navmenu.style.transform = "scaleY(0)";
+		})
+		navmenu.addEventListener("mouseover", function () {
+			navmenu.style.transform = "scaleY(1)";
+		})
+		navmenu.addEventListener("mouseleave", function () {
+			navmenu.style.transform = "scaleY(0)";
+		})
+		var smts = [["S1", "S2"], ["S3", "S4"], ["S5", "S6"], ["S5", "S6"]]
+		var lvls = ["L1", "L2", "CS", "AI"]
+		var subs = [[["Algorithmics", "Machine Structure", "Analysis", "Digital", "Algebra", "Automation", "Terminology", "English"], []], [["Algorithmics", "Digital Methods", "Graphs Theory", "Mathematical Logics", "Computer Architecture", "Information System", "English", "Workshop"], []], [[], []], [[], []]]
+		var roles = ["Student", "Teacher", "Manager", "Admin"]
+		icnRol = ["fa-pen-nib", "fa-mortar-board", "fa-shield-halved", "fa-code"]
+		var smstr = 0
+		var lastMain;
+		var curMain;
+		ref = true
+		function getEmoji(field) {
+			var icns = "💻,🔢,🌐,🚨,💾,📂,📖,🛠️".split(",")
+			var flds = "Algorithmics,Digital Methods,Graphs Theory,Mathematical Logics,Computer Architecture,Information System,English,Workshop".split(",")
+			return icns[flds.indexOf(field)] + "&#160;"
+		}
+		var main = {
+			quiz: {},
+			doc: {},
+			admin: {},
+			home: {},
+			ctxMenu: {}
+		}
+		local = {
+			get: function (key) {
+				return atob(localStorage.getItem(key))
+			},
+			set: function (key, val) {
+				return localStorage.setItem(key, btoa(val))
+			},
+			getj: function (key) {
+				return JSON.parse(this.get(key))
+			},
+			setj: function (key, val) {
+				return this.set(key, JSON.stringify(val))
+			},
+			data: {},
+			saveData: function () {
+				this.setj("data", this.data)
+			}
+		}
+		document.getElementById("footer").addEventListener("click", function () {
+			if (curMain == "overlay") {
+				hide(curMain)
+				show(lastMain)
+				curMain = lastMain
+			}
+		})
+		function getAge(birth) {
+			return ((Date.now() - new Date(birth)) / 31557600000).toFixed(2)
+		}
+		function nit() {
+			window.open("#", "_blank")
+		}
+		function hide(elm) {
+			var el = document.getElementById(elm)
+			if (el) el.style.display = "none"
+		}
+		function show(elm) {
+			var el = document.getElementById(elm)
+			if (el) el.style.display = "block"
+		}
+		function flex(elm) {
+			var el = document.getElementById(elm)
+			if (el) el.style.display = "flex"
+		}
+		function inline(elm) {
+			var el = document.getElementById(elm)
+			if (el) el.style.display = "inline"
+		}
+		function noclick(elm) {
+			var el = document.getElementById(elm)
+			if (el) el.disable = true
+		}
+		function ronly(elm) {
+			var el = document.getElementById(elm)
+			if (el) el.readOnly = true
+		}
+		function openInNewTab(url) {
+			window.open(url, '_blank');
+		}
+		function copyText(txt) {
+			navigator.clipboard.writeText(txt)
+		}
+		function imageToBase64(imgElement) {
+			const canvas = document.createElement("canvas");
+			const ctx = canvas.getContext("2d");
+			canvas.width = imgElement.width;
+			canvas.height = imgElement.height;
+			ctx.drawImage(imgElement, 0, 0);
+			return canvas.toDataURL("image/x-icon");
+		}
+		function dialog(cnt) {
+			var dlg = document.getElementById("dialog")
+			dlg.innerHTML = cnt
+			lastMain = curMain
+			hide(curMain)
+			curMain = "overlay"
+			flex("overlay")
+			document.addEventListener("click", function () {
+				hide("dialog")
+			})
+		}
+		function popup(cnt, id) {
+			var ovr = document.createElement("div")
+			ovr.classList.add("overlay")
+			ovr.id = id
+			var dlg = document.createElement("div")
+			dlg.classList.add("dialog")
+			dlg.innerHTML = cnt
+			ovr.appendChild(dlg)
+			document.body.appendChild(ovr)
+			ovr.addEventListener("click", function (evt) {
+				if (evt.target.classList.contains("overlay")) {
+					evt.target.style.opacity = 0
+					setTimeout(function () {
+						evt.target.style.display = "none"
+					}, 100)
+				}
+			})
+		}
+		function usersToArray(users) {
+			var ary = []
+			var uid = Object.getOwnPropertyNames(users)
+			for (var i = 0; i < uid.length; i++) {
+				ary[i] = users[uid[i]]
+				ary[i].user = uid[i]
+			}
+			return ary
+		}
+		function getSectn(lvl, sct) {
+			return [["A", "B"], ["A", "B"], ["CS", "AI"]][lvl][sct]
+		}
+		function clkUsr(elm, uid) {
+
+		}
+		GeminiPro = {
+			api: "AIzaSyDTrT3OMN3ZiU1FFXGkqJ9_DAHbpROOKlY",
+			genAI: function () { return new GoogleGenerativeAI(this.api) },
+			chats: [],
+			models: [],
+			model: function () {
+				var mod = new GoogleGenerativeAI(this.api).getGenerativeModel({ model: "gemini-1.5-flash" })
+				this.models.push(mod)
+				return mod
+			},
+			init: function () {
+				this.model()
+			},
+			sendMessage: async function (msg, idx = 0) {
+				return (await this.models[idx].generateContent(msg)).response.text()
+			},
+			startChat: function (mod = 0) {
+				var chat = this.models[mod].startChat()
+				this.chats.push(chat)
+				return chat
+			},
+			sendChat: async function (msg, idx = 0) {
+				return (await this.chats[idx].sendMessage(msg)).response.text()
+			},
+
+		}
+		GeminiPro.init()
+		function menu(dist) {
+			var lst = ["home", "admin", "inbox", "quizes", "community", "store", "report", "settings"]
+			if (localStorage.getItem("signedin")) {
+				if (dist == "logout") {
+					localStorage.clear()
+					location.reload()
+				}
+				hide(curMain)
+				lastMain = curMain
+				curMain = dist
+				switch (dist) {
+					case lst[1]:
+						show(dist)
+						/*firebase.database().ref("/users").get().then(r => {
+							var usr = usersToArray(r.val())*/
+						usr = [{
+							"birth": "2004-11-22", "dscrd": "Discord", "fname": "Family", "gendr": "0", "level": "1", "name": "Sid Ali Ilyes",
+							"phone": "0698761907", "role": 3, "sectn": "0", "stdid": "232331782501", "time": 1731802846353, "user": "lixTx8Y7ISMcdeHMcXn8hUxvOUu2"
+						}]
+						usr.push(usr[0])
+						usr.push(usr[0])
+						usr.push({
+							"birth": "2004-11-22", "dscrd": "Discord", "fname": "Family", "gendr": "1", "level": "1", "name": "Sid Ali Ilyes",
+							"phone": "0698761907", "role": 2, "sectn": "0", "stdid": "232331782501", "time": 1731802846353, "user": "lixTx8Y7ISMcdeHMcXn8hUxvOUu2"
+						})
+						usr.push({
+							"birth": "2004-11-22", "dscrd": "Discord", "fname": "Family", "gendr": "0", "level": "1", "name": "Sid Ali Ilyes",
+							"phone": "0698761907", "role": 1, "sectn": "0", "stdid": "232331782501", "time": 1731802846353, "user": "lixTx8Y7ISMcdeHMcXn8hUxvOUu2"
+						})
+						usr.push({
+							"birth": "2004-11-22", "dscrd": "Discord", "fname": "Family", "gendr": "1", "level": "1", "name": "Sid Ali Ilyes",
+							"phone": "0698761907", "role": 0, "sectn": "0", "stdid": "232331782501", "time": 1731802846353, "user": "lixTx8Y7ISMcdeHMcXn8hUxvOUu2"
+						})
+						local.users = usr
+						var icn = ["fa-pen-nib", "fa-mortar-board", "fa-shield-halved", "fa-code"]
+						var users = document.getElementById("users")
+						var cnt = "<tr><th><!--<span class='fas fa-navicon'></span>--></th><th>Name</th><th>Year</th><th>Section</th><th>Discord</th></tr>"
+						for (var i = 0; i < usr.length; i++) {
+							cnt += "<tr onclick='clkUsr(this,'" + usr[i].user + "')' class='studrow " + (!parseInt(usr[i].gendr) ? "studrow-male" : "studrow-fmale") + "'><td id='icons' title='" + roles[usr[i].role] + "'><span class='fas " + icn[usr[i].role] + "'></span></td><td>" + usr[i].name + "</td><td>" + (parseInt(usr[i].level) + 1) + "</td><td>L" + getSectn(usr[i].level, usr[i].sectn) + "</td><td>" + usr[i].dscrd + "</td></tr>"
+						}
+						users.innerHTML = cnt
+						main.admin.users = usr
+						main.admin.rows = Array.from(users.rows)
+						var cmnu = "Message,Copy Link,Infos,Edit,Copy Infos,Delete".split(",")
+						var oper = [function (pevt, pidx) {
+							console.log(pidx)
+							pevt.target.parentElement.lastChild.lastChild.click()
+						}, function (pevt, pidx) {
+							copyText(main.doc.files[pidx].downUrl)
+						}, function (pevt, pidx) {
+							popup(`<table style="text-align:left;padding:5px">
+								<tr><td>Name:</td><td class="textProp" onclick="copyText(this.innerText)">${main.admin.users[pidx].name}</td></tr>
+								<tr><td>Surname:</td><td class="textProp" onclick="copyText(this.innerText)">${main.admin.users[pidx].fname}</td></tr>
+								<tr><td>Gender:</td><td>${main.admin.users[pidx].gendr == "0" ? "Male" : "Female"}</td></tr>
+								<tr><td>Year:</td><td>${lvls[main.admin.users[pidx].level]}</td></tr>
+								<tr><td>Section:</td><td>${main.admin.users[pidx].sectn}</td></tr>
+								<tr><td>Birth:</td><td class="textProp" onclick="copyText(this.innerText)">${new Date(main.admin.users[pidx].birth).toString().replace(/\sGMT.*/, '')}</td></tr>
+								<tr><td>Phone:</td><td class="textProp" onclick="copyText(this.innerText)">${main.admin.users[pidx].phone}</td></tr>
+								<tr><td>Discord:&nbsp;&nbsp;</td><td class="textProp" onclick="copyText(this.innerText)">${main.admin.users[pidx].dscrd}</td></tr>
+								<tr><td>Role:</td><td><span class="fas ${icnRol[main.admin.users[pidx].role]}"></span>&nbsp;${roles[main.admin.users[pidx].role]}</td></tr>
+								<tr><td>ID:</td><td class="textProp" onclick="copyText(this.innerText)">${main.admin.users[pidx].stdid}</td></tr>
+								<tr><td>UID:</td><td class="textProp" onclick="copyText(this.innerText)">${main.admin.users[pidx].user}</td></tr>
+								</table>`, "fcmnux")
+						}, function (pevt, pidx) {
+							var opts = ""
+							for (var i = 0; i < roles.length; i++) {
+								opts += "<option value='" + i + "' " + (main.admin.users[pidx].role == i ? "selected" : "") + "><span class='fas " + icnRol[i] + "'></span>&nbsp;" + roles[i] + "</option>"
+							}
+							popup(`<table style="text-align:left;padding:5px">
+								<tr><td>Name:</td><td><input class="textField" type="text" value="${main.admin.users[pidx].name}"></td></tr>
+								<tr><td>Surname:</td><td><input class="textField" type="text" value="${main.admin.users[pidx].fname}"></td></tr>
+								<tr><td>Gender:</td><td><select class="textField"><option value="0" ${parseInt(main.admin.users[pidx].gendr) ? "" : "selected"}>Male</option><option value="1" ${parseInt(main.admin.users[pidx].gendr) ? "selected" : ""}>Female</option></select></td></tr>
+								<tr><td>Year:</td><td><input class="textField" type="text" value="${lvls[main.admin.users[pidx].level]}"></td></tr>
+								<tr><td>Section:</td><td><input class="textField" type="text" value="${main.admin.users[pidx].sectn}"></td></tr>
+								<tr><td>Birth:</td><td><input class="textField" type="date" value="${new Date(main.admin.users[pidx].birth).toLocaleDateString().split("/").reverse().join("-")}"></td></tr>
+								<tr><td>Phone:</td><td><input class="textField" type="number" value="${main.admin.users[pidx].phone}"></td></tr>
+								<tr><td>Discord:&nbsp;&nbsp;</td><td><input class="textField" type="text" value="${main.admin.users[pidx].dscrd}"></td></tr>
+								<tr><td>Role:</td><td><select class="textField">${opts}</select></td></tr>
+								</table>`, "fcmnue")
+						}, function (pevt, pidx) {
+							window.location.assign("#report")
+
+						}, function (pevt, pidx) {
+							store.ref(main.doc.files[pidx].fullPath).delete().then(r => {
+								firebase.database().ref(main.doc.ref + "/" + main.doc.files[pidx].dkey).remove().then(r => {
+									pevt.target.parentElement.style.display = "none"
+								}).catch(fcatch)
+							}).catch(fcatch)
+						}]
+						newContextMenu(document.getElementById("users"), "user", `<ul>
+							<li><span class="fas fa-message ctxOpt" style="color:limeGreen"></span>&#160; Message</li>
+							<li><span class="fas fa-link ctxOpt" style="color:DodgerBlue"></span>&#160; Copy Link</li>
+							<li><span class="fas fa-circle-info ctxOpt" style="color:darkCyan"></span>&#160; Infos</li>
+							<li><span class="fas fa-pencil ctxOpt" style="color:blue"></span>&#160; Edit</li>
+							<li><span class="fas fa-copy ctxOpt" style="color:DarkSlateBlue"></span>&#160; Copy Infos</li>
+							<li><span class="fas fa-trash ctxOpt" style="color:red"></span>&#160; Delete</li>
+							</ul>`,
+							function (pevt, mevt) {
+								pidx = main.admin.rows.indexOf(pevt.target.parentElement) - 1
+								oper[cmnu.indexOf(mevt.target.innerText.trim())](pevt, pidx)
+							}, "TD")
+						//}).catch(fcatch)
+						break;
+					case lst[2]:
+						show(dist)
+						coming(dist)
+						break;
+					case lst[3]:
+						show(dist)
+						var o = {
+							dif: document.getElementById("qzdif"),
+							dfc: document.getElementById("difc"),
+							ttl: document.getElementById("qzsttl"),
+							iqt: document.getElementById("dqst"),
+							nqt: document.getElementById("nqst"),
+							qst: document.getElementById("quiztxt"),
+							an1: document.getElementById("quizsn1"),
+							an2: document.getElementById("quizsn2"),
+							an3: document.getElementById("quizsn3"),
+							an4: document.getElementById("quizsn4"),
+							cts: subs[parseInt(local.data.level)][parseInt(local.data.sectn)],
+							cat: document.getElementById("catlst"),
+							ctg: document.getElementById("categ"),
+							buf: [],
+							isLoad: false
+						}
+						//var cats = ["Cybersecurity", "8086 asm", "Algorithmics", "Graphs Theory", "Digital Methods"]
+						var cnt = ""
+						for (var i = 0; i < o.cts.length; i++) {
+							cnt += "<option value='" + o.cts[i] + "'>" + o.cts[i] + "</option>"
+						}
+						o.cat.innerHTML = cnt
+						GeminiPro.startChat()
+						function rqstQ(isNew = false, dif = o.dfc.value, cat = /*"Cybersecurity"*/o.ctg.value) {
+							if (isNew) {
+								o.buf = []
+								o.idx = 0
+								o.crc = 0
+								GeminiPro.sendChat("Generate a complex " + cat + " question of difficulty " + dif + "/10000 (auto-increase), with four proposed answers (only one correct, index varying from 1 to 4). Return the result in the following format: \"ActualQuestion|Answer1|Answer2|Answer3|Answer4|Difficulty|IndexOfCorrectAnswer\". Replace \"ActualQuestion\" with the actual question text and format the answers accordingly. Do not include any extra text or labels in your response.When I type \"next\" you may give me next question,  \"stop\" to stop").then(recvQ).catch(fcatch)
+							} else {
+								GeminiPro.sendChat("next").then(recvQ).catch(fcatch)
+							}
+						}
+						function recvQ(r) {
+							o.buf.push(r.trim().split("|"))
+							if (!o.isLoad) {
+								o.isLoad = true
+								loadQ(0, 0)
+							}
+						}
+						function loadQ(val, dur = 5000) {
+							if (o.buf.length > 0) {
+								var res = o.buf[o.buf.length - 1]
+								if (res[6] == 0) res[6]++
+								if (res[6] == val) o.crc++;
+								for (var i = 1; i < 5; i++) {
+									if (res[6] == i) {
+										o["an" + i].classList.add("qzans-crc")
+									} else {
+										o["an" + i].classList.add("qzans-err")
+									}
+								}
+								setTimeout(function () {
+									if (o.idx == o.nqt.value) {
+										alert("You got: " + o.crc + "/" + o.nqt.value + " correct!")
+									} else {
+										o.buf.shift()
+										o.idx++
+										o.iqt.innerHTML = o.idx
+										o.ttl.innerHTML = o.nqt.value
+										if (res[0] == "Question" || res[0] == "ActualQuestion") res.shift();
+										o.qst.innerHTML = res[0]
+										for (var i = 1; i < 5; i++) {
+											o["an" + i].innerHTML = res[i]
+											o["an" + i].classList.remove("qzans-crc")
+											o["an" + i].classList.remove("qzans-err")
+										}
+										o.dif.innerHTML = res[5]
+										main.quiz.wnbox.style.display = "none"
+										setTimeout(rqstQ, 500)
+									}
+								}, dur)
+							}
+						}
+						main.quiz = {
+							o: o,
+							loadQ: loadQ,
+							recvQ: recvQ,
+							rqstQ: rqstQ,
+							wnbox: warn("zap", "Loading Questions", "blue", null, "gemai")
+						}
+						rqstQ(true)
+						break;
+					case lst[4]:
+						show(dist)
+						coming(dist)
+						break;
+					case lst[5]:
+						show(dist)
+						coming(dist)
+						break;
+					case lst[6]:
+						show(dist)
+						break;
+					case lst[7]:
+						show(dist)
+						break
+					case lst[8]:
+						show(dist)
+						break
+					case lst[0]:
+					default:
+						show(lst[0])
+						curMain = "docs"
+						show(curMain)
+						var smt = document.getElementById("semst")
+						var sbj = document.getElementById("subjc")
+						main.home.smt = smt
+						main.home.sbj = sbj
+						smt.addEventListener("change", function () {
+							var dx = smt.value.split("")
+							var ar = subs[dx[0]][dx[1]]
+							var cnt = ""
+							for (var i = 0; i < ar.length; i++) {
+								cnt += `<option value="${i}">${getEmoji(ar[i])} ${ar[i]}</option>`
+							}
+							cnt += `<option value="">💼&#160; All</option>`
+							sbj.innerHTML = cnt
+							sbj.value = "0"
+							sbj.dispatchEvent(new Event('change'));
+						})
+						sbj.addEventListener("change", function () {
+							listDocs()
+						})
+						document.getElementById("inpUpld").addEventListener("change", function (evt) {
+							document.getElementById('upload').style.backgroundColor = '#4CAF50'
+							upload(evt)
+						})
+						var cmnu = "Download,Copy Link,Infos,Rename,Report,Delete".split(",")
+						var oper = [function (pevt, pidx) {
+							console.log(pidx)
+							pevt.target.parentElement.lastChild.lastChild.click()
+						}, function (pevt, pidx) {
+							copyText(main.doc.files[pidx].downUrl)
+						}, function (pevt, pidx) {
+							popup(`<table style="text-align:left;padding:5px">
+								<tr><td>Name:</td><td class="textProp" onclick="copyText(this.innerText)">${main.doc.files[pidx].name}</td></tr>
+								<tr><td>Mimetype:&#160;  </td><td>${main.doc.files[pidx].contentType}</td></tr>
+								<tr><td>Uploaded:</td><td>${new Date(main.doc.files[pidx].timeCreated).toString().replace(/\sGMT.*/, '')}</td></tr>
+								<tr><td>Updated:</td><td>${new Date(main.doc.files[pidx].updated).toString().replace(/\sGMT.*/, '')}</td></tr>
+								<tr><td>Size:</td><td>${fileSize(main.doc.files[pidx].size)} (${main.doc.files[pidx].size} B)</td></tr>
+								<tr><td>MD5:</td><td class="textProp" onclick="copyText(this.innerText)">${main.doc.files[pidx].md5Hash}</td></tr>
+								<tr><td>Path:</td><td class="textProp" onclick="copyText(this.innerText)">${main.doc.files[pidx].fullPath}</td></tr>
+								<tr><td>By User:</td><td class="textProp" onclick="copyText(this.innerText)">${main.doc.files[pidx].user}</td></tr>
+								</table>`, "fcmnux")
+						}, function (pevt, pidx) {
+							popup(``, "renam")
+						}, function (pevt, pidx) {
+							window.location.assign("#report")
+
+						}, function (pevt, pidx) {
+							store.ref(main.doc.files[pidx].fullPath).delete().then(r => {
+								firebase.database().ref(main.doc.ref + "/" + main.doc.files[pidx].dkey).remove().then(r => {
+									pevt.target.parentElement.style.display = "none"
+								}).catch(fcatch)
+							}).catch(fcatch)
+						}]
+						newContextMenu(document.getElementById("docTbl"), "docMnu", `<ul>
+							<li><span class="fas fa-download ctxOpt" style="color:limeGreen"></span>&#160; Download</li>
+							<li><span class="fas fa-link ctxOpt" style="color:DodgerBlue"></span>&#160; Copy Link</li>
+							<li><span class="fas fa-circle-info ctxOpt" style="color:DarkSlateBlue"></span>&#160; Infos</li>
+							<li><span class="fas fa-pencil ctxOpt" style="color:blue"></span>&#160; Rename</li>
+							<li><span class="fas fa-flag ctxOpt" style="color:orange"></span>&#160; Report</li>
+							<li><span class="fas fa-trash ctxOpt" style="color:red"></span>&#160; Delete</li>
+							</ul>`,
+							function (pevt, mevt) {
+								pidx = main.doc.rows.indexOf(pevt.target.parentElement) - 1
+								oper[cmnu.indexOf(mevt.target.innerText.trim())](pevt, pidx)
+
+							}, "TD")
+
+						smt.value = (local.data.level == 2 ? local.data.level + local.data.sectn : local.data.level) * 10 + smstr
+						smt.dispatchEvent(new Event('change'));
+						switch (local.data.role) {
+							case 0:
+								hide("upload")
+								hide("doctp")
+								var sc = local.data.level == 2 ? local.data.level + local.data.sectn : local.data.level
+								smt.innerHTML = `
+                  <option value="${sc * 10}">S${local.data.level * 2 + 1}</option>
+                  <option value="${sc * 10 + 1}">S${local.data.level * 2 + 2}</option>
+                `
+								break
+							case 1:
+
+								//smt.innerHTML=smts.join().split(",")[local.data.level*2+smstr]
+								break
+							case 2:
+
+								break
+							case 3:
+
+								break
+						}
+					//listDocs()
+				}
+			}
+		}
+		function fixFileName(fnm, isRev = false) {
+			var pat = [[".", "#", "$", "[", "]"], ["_DOT_", "_HSH_", "_DLR_", "_LBR_", "_RBR_"]]
+			for (var i = 0; i < pat.length; i++) {
+				fnm = fnm.replaceAll(pat[isRev ? 1 : 0][i], pat[isRev ? 0 : 1][i])
+			}
+			return fnm
+		}
+		function fixMD5(hash, rev = false) {
+			var pat = [[".", "#", "$", "[", "]", "/"], ["_DOT_", "_HSH_", "_DLR_", "_BRL_", "_BRR_", "-"]]
+			for (var i = 0; i < pat[0].length; i++) {
+				hash = hash.replaceAll(pat[rev ? 1 : 0][i], pat[rev ? 0 : 1][i])
+			}
+			return hash
+		}
+		function upload(evt) {
+			var file = evt.target.files[0]
+			var sm = document.getElementById("semst").value.split("")
+			var nme = file.name/*.split(".")
+			if (nme.length > 1) {
+				nme = [nme.slice(0, -1).join("."), nme[nme.length - 1]]
+				//nme=nme.slice(0,2)
+			} else {
+				nme[1] = ""
+			}*/
+			var ref = store.ref((lvls[sm[0]] + "/" + smts[sm[0]][sm[1]] + "/" + subs[sm[0]][sm[1]][document.getElementById("subjc").value]).replaceAll(" ", "_") + "/" + /*nme[0] + document.getElementById("doct").value + (nme.length == 0 ? "" : ".") + nme[1]*/ nme)
+			hide("upload")
+			show("progress-container")
+			show("progressText")
+			const progressBar = document.getElementById('progressBar');
+			const progressText = document.getElementById('progressText');
+
+			const uploadTask = ref.put(file);
+			uploadTask.on(
+				'state_changed',
+				(snapshot) => {
+					const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+					progressBar.style.width = `${progress}%`;
+					progressText.textContent = `${progress.toFixed(2)}%`;
+				},
+				(error) => {
+					// Handle errors
+					console.error('Upload failed:', error);
+					progressText.textContent = 'Upload failed';
+				},
+				() => {
+					progressBar.style.width = "100%"
+					hide("progress-container")
+					hide("progressText")
+					show("upload")
+					// Upload complete
+					uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+						progressText.textContent = `Upload complete! File available at: ${downloadURL}`;
+						uploadTask.snapshot.ref.getMetadata().then((metad) => {
+							var pth = metad.fullPath.split(metad.name)
+							if (pth[pth.length - 1] == "") pth.pop();
+							pth = pth.join(pth.length > 1 ? metad.name : "") + fixMD5(metad.md5Hash);
+							firebase.database().ref("/docs/" + fixFileName(pth)).set({
+								user: local.data.user,
+								name: metad.name,
+								downUrl: downloadURL,
+								type: document.getElementById("doct").value,
+								fullPath: metad.fullPath,
+								size: metad.size,
+								md5Hash: metad.md5Hash,
+								timeCreated: metad.timeCreated,
+								updated: metad.updated,
+								contentDisposition: metad.contentDisposition,
+								contentEncoding: metad.contentEncoding,
+								contentType: metad.contentType
+							}).then(r => listDocs()).catch(fcatch)
+						}).catch(fcatch)
+					}).catch(fcatch);
+				}
+			);
+		}
+
+		function getFileExt(file) {
+			var match = file.match(/\.([a-zA-Z0-9]+)$/);
+			return match ? match[1] : "other";
+		}
+
+		function getFileIcon(file) {
+			var res = "images/"
+			switch (getFileExt(file)) {
+				case "png":
+				case "jpg":
+					res += "img.png"
+					break
+				case "pdf":
+					res += "pdf.png"
+					break
+				case "ppt":
+				case "pptx":
+				case "odf":
+					res += "powerpoint.png"
+					break
+				case "doc":
+				case "docx":
+					res += "word.png"
+					break
+				case "xls":
+				case "xlsx":
+					res += "excel.png"
+					break
+				case "py":
+					res += "python.png"
+					break
+				case "txt":
+					res += "text.png"
+					break
+				case "htm":
+				case "html":
+					res += "html.png"
+					break
+				case "css":
+					res += "css.png"
+					break
+				case "js":
+					res += "js.png"
+					break
+				case "other":
+				default:
+					res += "ofile.png"
+			}
+			return res
+		}
+
+		function dwnDoc(url) {
+			openInNewTab(url)
+		}
+		function fileSize(sz) {
+			const units = ["", "Ki", "Mi", "Gi", "Ti", "Pi"];
+			let i;
+			for (i = 0; i < units.length && sz >= 1024; i++) {
+				sz /= 1024;
+			}
+			return (sz % 1 == 0 ? sz : sz.toFixed(2)) + " " + units[i] + "B";
+		}
+		function timeAgo(tim) {
+			var ret = ["Just now", "%d Minutes ago", "%d Hours ago", "%d Days ago", "%d Weeks ago", "%d Months ago", "%d Years ago"]
+			var rcm = [6e4, 60, 24, 7, 4, 12, 100]
+			var pss = Date.now() - tim
+			for (var i = 0; i < ret.length; i++) {
+				pss /= rcm[i]
+				if (pss < 1) return ret[i].replace("%d", Math.floor(pss * rcm[i]))
+			}
+			return "A century..."
+		}
+
+		function listDocs(fldr = null) {
+			if (!fldr) {
+				var sm = main.home.smt.value.split("")
+				fldr = "/" + (lvls[sm[0]] + "/" + smts[sm[0]][sm[1]] + "/" + subs[sm[0]][sm[1]][document.getElementById("subjc").value]).replaceAll(" ", "_")
+			}
+			var doc = document.getElementById("docTbl")
+			var cnt = "<thead><tr><th rowspan='2'>Type</th><th colspan='2'>Filename</th><th rowspan='2'>Size</th><th rowspan='2'>Control</th></tr><tr><th colspan='2'>Date</th></tr></thead><tbody>"
+			main.doc.ref = "/docs/" + fldr
+			/*/firebase.database().ref("/docs/" + fldr).get().then(r => {
+				if (r.exists()) {
+					var g = r.val()*/
+			g = {
+				"UjgjuWzcjoLjB3D8sXfglQ==": {
+					"contentDisposition": "inline; filename*=utf-8''db.c",
+					"contentEncoding": "identity",
+					"contentType": "text/x-csrc",
+					"downUrl": "https://firebasestorage.googleapis.com/v0/b/mytest-46d1f.appspot.com/o/L2%2FS3%2FAlgorithmics%2Fdb.c?alt=media&token=a1c09be1-599d-4679-a5fe-d8fd52f8437f",
+					"fullPath": "L2/S3/Algorithmics/db.c",
+					"md5Hash": "UjgjuWzcjoLjB3D8sXfglQ==",
+					"name": "db.c",
+					"size": 707,
+					"timeCreated": "2024-11-30T14:40:19.149Z",
+					"type": "",
+					"updated": "2024-11-30T14:40:19.149Z",
+					"user": "lixTx8Y7ISMcdeHMcXn8hUxvOUu2"
+				},
+				"XwUTplqLTUQETNwE3hwRtw==": {
+					"contentDisposition": "inline; filename*=utf-8''LOIC.py",
+					"contentEncoding": "identity",
+					"contentType": "text/x-python",
+					"downUrl": "https://firebasestorage.googleapis.com/v0/b/mytest-46d1f.appspot.com/o/L2%2FS3%2FAlgorithmics%2FLOIC.py?alt=media&token=e506ea53-fe97-4592-9808-3bf42bbfb2ae",
+					"fullPath": "L2/S3/Algorithmics/LOIC.py",
+					"md5Hash": "XwUTplqLTUQETNwE3hwRtw==",
+					"name": "LOIC.py",
+					"size": 3683,
+					"timeCreated": "2024-12-03T11:40:13.916Z",
+					"type": "",
+					"updated": "2024-12-03T11:40:13.916Z",
+					"user": "lixTx8Y7ISMcdeHMcXn8hUxvOUu2"
+				},
+				"bLNXc6E9i9vKs1uQU46bJg==": {
+					"contentDisposition": "inline; filename*=utf-8''quiz.html",
+					"contentEncoding": "identity",
+					"contentType": "text/html",
+					"downUrl": "https://firebasestorage.googleapis.com/v0/b/mytest-46d1f.appspot.com/o/L2%2FS3%2FAlgorithmics%2Fquiz.html?alt=media&token=9676807c-ba07-4aeb-88b4-078e23327749",
+					"fullPath": "L2/S3/Algorithmics/quiz.html",
+					"md5Hash": "bLNXc6E9i9vKs1uQU46bJg==",
+					"name": "quiz.html",
+					"size": 4162,
+					"timeCreated": "2024-12-01T11:25:36.089Z",
+					"type": "",
+					"updated": "2024-12-01T11:25:36.089Z",
+					"user": "lixTx8Y7ISMcdeHMcXn8hUxvOUu2"
+				},
+				"dOg2v3qYOAwZRskYpDMa4Q==": {
+					"contentDisposition": "inline; filename*=utf-8''download%20%281%29.jpg",
+					"contentEncoding": "identity",
+					"contentType": "image/jpeg",
+					"downUrl": "https://firebasestorage.googleapis.com/v0/b/mytest-46d1f.appspot.com/o/L2%2FS3%2FAlgorithmics%2Fdownload%20(1).jpg?alt=media&token=1ca61fbd-57ac-4f42-a9e2-6a80a0f0067a",
+					"fullPath": "L2/S3/Algorithmics/download (1).jpg",
+					"md5Hash": "dOg2v3qYOAwZRskYpDMa4Q==",
+					"name": "download (1).jpg",
+					"size": 6425,
+					"timeCreated": "2024-11-29T22:32:55.547Z",
+					"type": "",
+					"updated": "2024-11-29T22:32:55.547Z",
+					"user": "lixTx8Y7ISMcdeHMcXn8hUxvOUu2"
+				},
+				"q5N4KXCd7a3DEFUAjWS3Yw==": {
+					"contentDisposition": "inline; filename*=utf-8''cpp-assembler-msvc-170.pdf",
+					"contentEncoding": "identity",
+					"contentType": "application/pdf",
+					"downUrl": "https://firebasestorage.googleapis.com/v0/b/mytest-46d1f.appspot.com/o/L2%2FS3%2FAlgorithmics%2Fcpp-assembler-msvc-170.pdf?alt=media&token=af6a77f1-ca58-494b-a839-8b94cc08b646",
+					"fullPath": "L2/S3/Algorithmics/cpp-assembler-msvc-170.pdf",
+					"md5Hash": "q5N4KXCd7a3DEFUAjWS3Yw==",
+					"name": "cpp-assembler-msvc-170.pdf",
+					"size": 6654346,
+					"timeCreated": "2024-12-05T20:44:52.875Z",
+					"type": "",
+					"updated": "2024-12-05T20:44:52.875Z",
+					"user": "lixTx8Y7ISMcdeHMcXn8hUxvOUu2"
+				},
+				"xqpNXPPxgG9BmYnOTEbIQ==": {
+					"contentDisposition": "inline; filename*=utf-8''8.pdf",
+					"contentEncoding": "identity",
+					"contentType": "application/pdf",
+					"downUrl": "https://firebasestorage.googleapis.com/v0/b/mytest-46d1f.appspot.com/o/L2%2FS3%2FAlgorithmics%2F8.pdf?alt=media&token=23dd503d-e2fe-4403-babe-87f133a90f04",
+					"fullPath": "L2/S3/Algorithmics/8.pdf",
+					"md5Hash": "/xqpNXPPxgG9BmYnOTEbIQ==",
+					"name": "8.pdf",
+					"size": 5693961,
+					"timeCreated": "2024-11-29T22:38:02.320Z",
+					"type": "",
+					"updated": "2024-11-29T22:38:02.320Z",
+					"user": "lixTx8Y7ISMcdeHMcXn8hUxvOUu2"
+				}
+			}
+			var k = Object.getOwnPropertyNames(g)
+			for (var i = 0; i < k.length; i++) {
+				var key = k[i]
+				k[i] = g[k[i]]
+				k[i].timeCreated = Date.parse(k[i].timeCreated)
+				k[i].dkey = key
+			}
+			k = k.sort((a, b) => b.timeCreated - a.timeCreated)
+			var cnt = `<thead><tr><th colspan=4>Filename (Showing: ${k.length})</th><th>Time</th><th>Size</th><th>Control</th></thead><tbody>`////
+			for (var i = 0; i < k.length; i++) { ///new Date(g[k[i]].timeCreated).toString().replace(/\sGMT.*/, '')
+				cnt += `<tr class="files"><td><img src="${getFileIcon(k[i].name)}?v=1.0" alt="FileIcon"></td><td colspan="2" id="fname" onclick="dwnDoc('${k[i].downUrl}')">${k[i].name}</td><td colspan='2'>${timeAgo(k[i].timeCreated)}</td><td>${fileSize(k[i].size)}</td><td><button class="validate" onclick="download('${k[i].downUrl}','${k[i].name}')"><span class="fas fa-download"></span>&nbsp;Download</button></td></tr>`
+			}
+
+			/*} else {
+				cnt += "<tr><td colspan=5>Folder Empty</td></tr>"
+			}*/
+			cnt += "</tbody>"
+			doc.innerHTML = cnt
+			main.doc.rows = Array.from(doc.rows)
+			main.doc.files = k
+			//}).catch(fcatch)
+			doc.addEventListener("click", function (evt) {
+				const clickedElement = evt.target;
+				if (clickedElement.tagName === 'TD') {
+					const clickedRow = clickedElement.parentElement;
+					const rowIndex = Array.from(doc.rows).indexOf(clickedRow);
+					//console.log('Clicked row index:', rowIndex - 1);
+				}
+			})
+
+		}
+
+		async function download(url, filename) {
+			/*const xhr = new XMLHttpRequest();
+			xhr.responseType = 'blob';
+			xhr.onload = function () {
+				if (xhr.status === 200) {
+					const objectURL = URL.createObjectURL(xhr.response);
+					window.location = objectURL;
+					setTimeout(() => URL.revokeObjectURL(objectURL), 0);
+				} else {
+					console.error(`Failed to download: ${xhr.statusText}`);
+				}
+			};
+			xhr.onerror = function () {
+				console.error('XHR request failed.');
+			};
+			xhr.open('GET', url);
+			xhr.send();*/
+			try {
+				const response = await fetch(url);
+				const blob = await response.blob();
+				const downloadUrl = URL.createObjectURL(blob);
+
+				const link = document.createElement('a');
+				link.href = downloadUrl;
+				link.download = filename;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+
+				URL.revokeObjectURL(downloadUrl);
+			} catch (error) {
+				console.error('Error downloading the file', error);
+			}
+		}
+
+		function coming(elm) {
+			var el = document.getElementById(elm + "txt")
+			el.value = "Coming s"
+			var itr = setInterval(function () {
+				if (itr) {
+					el.value += "o"
+				} else {
+					clearInterval(itr)
+					el.value += "n!"
+				}
+			}, 100)
+		}
+
+		function fcatch(e) {
+			console.warn(e)
+			warn("warning", e, "red", 3000, "errBox")
+		}
+
+		function fthen(r) {
+			console.log(r)
+		}
+
+		function report(val) {
+			firebase.database().ref("/report/" + local.data.user).push(val).then(fthen).catch(fcatch)
+		}
+		function gentok() {
+			var res = []
+			for (var i = 0; i < 5; i++) {
+				res.push(String.fromCharCode(Math.ceil(Math.random() > 0.5 ? Math.random() * 10 + 0x2f : Math.random() * 26 + 0x40)))
+			}
+			return res.join("")
+		}
+		function checkToken(tok = document.getElementById("txtToken").value) {
+			firebase.database().ref("/tokens/" + tok).get().then(r => {
+				var tkn = r.val()
+				if (r.exists()) {
+					if (tkn.expir > Date.now() && tkn.avail > 0) {
+						local.data.role = tkn.role
+						tkn.avail--
+						tkn.user = local.data.user
+						firebase.database().ref("/tokens/" + tok).set(tkn).catch(fcatch)
+					} else {
+						alert("Expired Token")
+					}
+				} else {
+					alert("Invalid Token")
+				}
+			}).catch(fcatch)
+		}
+
+		function loginAuth(prv) {
+			var prov = new firebase.auth[prv + "AuthProvider"]()
+			firebase.auth().signInWithPopup(prov).then(res => {
+				if (res.additionalUserInfo.isNewUser) {
+					if (local.filledInfos) {
+						local.data.email = res.user.email
+						local.data.photo = res.user.photoURL
+						local.data.prov = res.credential.providerId
+						local.data.time = Date.now()
+						firebase.database().ref("/users/" + res.user.uid).set(local.data).then(r => {
+							local.data.user = res.user.uid
+							local.saveData()
+							localStorage.signedin = true
+							location.reload()
+						}).catch(fcatch)
+
+					} else {
+						alert("Please Sign up first!")
+
+					}
+				} else {
+					firebase.database().ref("/users/" + res.user.uid).get().then(r => {
+						if (r.exists()) {
+							local.data = r.val()
+							local.data.user = res.user.uid
+							local.saveData()
+							localStorage.signedin = true
+							location.reload()
+						} else {
+							alert("Cannot load your data from database!")
+						}
+					}).catch(fcatch)
+				}
+
+
+			}).catch(e => {
+				console.error(e)
+			})
+
+		}
+		function scanQR(isReg) {
+			if (isReg) {
+				curMain = "sign-in-container"
+				dialog(`
+        <!--<button type="button" onclick="alert(55)" style="background-color:red;pointer-events: auto;">Close</button>-->
+        <div id="qr-scanner">
+          <video id="video" autoplay></video>
+          <canvas id="canvas"></canvas>
+          <div class="scan-area"></div>
+        </div>
+        <div id="output">Scan a QR code...</div>
+        <button type="button" id="toggle-camera">Switch Camera</button>`)
+				const video = document.getElementById('video');
+				const canvas = document.getElementById('canvas');
+				const context = canvas.getContext('2d', { willReadFrequently: true });
+				const output = document.getElementById('output');
+				const scanAreaSize = 200;
+				const toggleCameraBtn = document.getElementById('toggle-camera');
+
+				let currentStream = null;
+				let cameras = [];
+				let currentCameraIndex = 0;
+
+				async function startVideo(deviceId = null) {
+					if (currentStream) {
+						currentStream.getTracks().forEach(track => track.stop());
+					}
+
+					// Define constraints and handle when `deviceId` might not be available
+					const constraints = {
+						video: deviceId ? { deviceId: { exact: deviceId } } : true // Fallback to any camera
+					};
+
+					try {
+						const stream = await navigator.mediaDevices.getUserMedia(constraints);
+						currentStream = stream;
+						video.srcObject = stream;
+						video.play();
+						requestAnimationFrame(scanFrame);
+					} catch (error) {
+						if (error.name === 'OverconstrainedError') {
+							console.error("Device constraints not met, attempting fallback constraints.");
+							startVideo(); // Retry with fallback constraints
+						} else {
+							console.error('Error accessing the camera:', error);
+							output.textContent = "Camera access is required to scan QR codes.";
+						}
+					}
+				}
+
+
+				function switchCamera() {
+					if (cameras.length > 1) {
+						currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+						startVideo(cameras[currentCameraIndex].deviceId);
+					} else {
+						console.log("No other cameras to switch to.");
+					}
+				}
+
+				function scanFrame() {
+					if (video.readyState === video.HAVE_ENOUGH_DATA) {
+						canvas.width = video.videoWidth;
+						canvas.height = video.videoHeight;
+						context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+						const scanRegion = context.getImageData(
+							(canvas.width - scanAreaSize) / 2,
+							(canvas.height - scanAreaSize) / 2,
+							scanAreaSize,
+							scanAreaSize
+						);
+
+						const code = jsQR(scanRegion.data, scanRegion.width, scanRegion.height);
+
+						if (code) {
+							output.textContent = `QR Code Data: ${code.data}`;
+							currentStream.getTracks().forEach((track) => {
+								track.stop();
+							});
+							setTimeout(function () {
+								hide("overlay")
+								show("sign-in-container")
+								var dd = code.data.split("\n")
+								var nn = dd[0].split(" ")
+								document.getElementById("fname").value = nn[0]
+								document.getElementById("name").value = nn.slice(1).join(" ")
+								document.getElementById("birth").value = dd[2].split("/").reverse().join("-")
+								document.getElementById("stdid").value = dd[3].match(/\d+/gm)
+								ronly("birth")
+								ronly("stdid")
+							}, 200)
+						} else {
+							output.textContent = "No QR code detected.";
+						}
+					}
+					requestAnimationFrame(scanFrame);
+				}
+
+				toggleCameraBtn.addEventListener('click', switchCamera);
+
+				// Initialize the available cameras and start with the first one
+				navigator.mediaDevices.enumerateDevices().then(devices => {
+					cameras = devices.filter(device => device.kind === 'videoinput');
+					if (cameras.length > 0) {
+						startVideo(cameras[currentCameraIndex].deviceId);
+					} else {
+						console.log("No cameras found.");
+					}
+				})
+					.catch(error => console.error("Error accessing media devices:", error));
+
+
+			}
+		}
+
+		document.getElementById("signinForm").addEventListener('submit', function (event) {
+			// Prevent the default form submission behavior
+			event.preventDefault();
+
+			function checkStdId(id) {
+				var flg = id.toString().split("")
+				if (flg[0] == 9) {
+					return flg[1]
+				}
+				return 0
+			}
+
+			var d = document.getElementById('sectn').value.split("")
+
+			local.data = {
+				fname: document.getElementById('fname').value,
+				name: document.getElementById('name').value,
+				stdid: document.getElementById('stdid').value,
+				birth: document.getElementById('birth').value,
+				gendr: document.getElementById('gendr').value,
+				dscrd: document.getElementById('dscrd').value,
+				phone: document.getElementById('phone').value,
+				level: d[0],
+				sectn: d[1],
+				role: checkStdId(document.getElementById('stdid').value)
+			}
+			hide("validate")
+			hide("fild-signup")
+			hide("btn-signin")
+			show("fild-signin")
+			inline("btn-signup")
+			/*ronly("fname")
+			ronly("name")
+			ronly("stdid")
+			ronly("gendr")
+			ronly("birth")
+			ronly("dscrd")
+			ronly("phone")
+			noclick("sectn")*/
+			local.filledInfos = true
+
+			// If you need to do something with the data, such as sending it to a server, you can do it here
+		});
+		function updateConnectionStatus() {
+			if (navigator.onLine) {
+				alert('You are online');
+			} else {
+				alert('You are offline');
+			}
+		}
+		document.getElementById("sidebar").addEventListener("wheel", function (ev) {
+			if (ev.deltaY < 0) {
+				console.log('Scrolling up');
+			} else {
+				console.log('Scrolling down');
+			}
+		})
+		/////
+
+
+		function checkConnection() {
+			// Try to fetch a lightweight resource
+			fetch('https://www.google.com/favicon.ico', { method: 'HEAD', cache: 'no-store', mode: 'no-cors' })
+				.then(() => {
+					if (local.warn) {
+						local.warn.style.opacity = 0
+						setTimeout(function () {
+							var box = document.getElementById("boxOnline")
+							box.style.display = "none"
+							document.body.removeChild(box)
+						}, 300)
+					}
+				})
+				.catch(() => {
+					local.warn = warn("wifi", "No Connection", "red", null, "boxOnline")
+				});
+		}
+		setInterval(checkConnection, 5000);
+		checkConnection();
+
+		function warn(icn, msg, clr, timeout = null, id = "warnBox") {
+			var warnBox = document.createElement("div")
+			warnBox.classList.add("warnBox")
+			warnBox.id = id
+			warnBox.innerHTML = `
+				<span class="fas fa-${icn} fa-beat-fade" style="color:${clr}"></span>&#160; <b>${msg}</b>
+			`
+			warnBox.style.display = "block"
+			warnBox.style.opacity = 1
+			document.body.appendChild(warnBox)
+			if (timeout) {
+				setTimeout("var box=document.getElementById('" + id + "');box.style.display='none';document.body.removeChild(box)", timeout)
+			}
+			return warnBox
+		}
+		//warn("wifi", "No Connection", "red")
+		function newContextMenu(parn, id, cont, callback, accElm = null) {
+			var contextMenu = document.createElement("div")
+			contextMenu.classList.add("context-menu")
+			contextMenu.id = id
+			//document.getElementById('context-menu');
+			contextMenu.innerHTML = cont
+			main.ctxMenu.accElm = accElm
+			parn.addEventListener('contextmenu', function (event) {
+				if (main.ctxMenu.accElm && event.target.tagName != main.ctxMenu.accElm) return
+				event.preventDefault();
+				contextMenu.style.display = 'block';
+				contextMenu.style.opacity = 1
+				contextMenu.style.left = event.pageX + 'px';
+				contextMenu.style.top = event.pageY + 'px';
+				main.ctxMenu.pevt = event
+			});
+			document.addEventListener('click', function () {
+				contextMenu.style.opacity = 0
+				setTimeout(function () {
+					contextMenu.style.display = 'none';
+				}, 300)
+
+			});
+			contextMenu.addEventListener('click', function (evt) {
+				callback(main.ctxMenu.pevt, evt)
+			});
+			document.body.appendChild(contextMenu);
+			return contextMenu
+		}
+
+		var qf = "QfiwENChlNHBjQLJVLHJiOiQWS05WZtVmc1NXYl1mIsISNxMGM5YzNwITOxQzM4UDZlVTOmFTO6IWZ3pDOwgzMzADMxAzM1YjOxIiOiQWSwBXYiwiI4ADOzMDMwEDMzUjNiojIklkclRmblN1Zul2ZhN3cl1mIsISbvNmL09GczBHch5iZxQmN00CdzVGd51mI6ICdlt2Y1JUZnFmcvR3ciwiImFDZ2QTL0NXZ0lXbiojIklEdjVmavJHciwiIt92Yu8WalNXYiVmcpZmLiRGdy1CdsVXYmVGZtYWMkZDNtQ3clRXet9yL6MHc0RHaiojIMJVVlNXYiFGdhRmIsISbvNmLwBXYlNXYiVmcpZmLmFDZ2QTL0NXZ0lXbiojIulWYt9GRoRXdhJCLicmcs52cyhEMlhDVDpWQnpWW1w2ZudTQJFVcudlW5RVUDl3UhpXSBJiOikXZLlGchJye=="
+		document.addEventListener('DOMContentLoaded', function () {
+			window.addEventListener('online', updateConnectionStatus);
+			window.addEventListener('offline', updateConnectionStatus);
+			if (localStorage.getItem("signedin")) {
+				document.getElementById("sidebar").style.pointerEvents = "auto"
+				document.getElementById("sidebar").style.opacity = "1"
+				local.data = local.getj("data")
+				if (local.data.role > 0) show("admin-link");
+				document.getElementById("stdName").innerHTML = "<span class='fas " + icnRol[local.data.role] + "'></span>&nbsp;" + local.data.fname + " " + local.data.name.replace(" ", "&nbsp;")
+
+
+				firebase.database().ref("/users/" + local.data.user).get().then(r => {
+					if (r.exists()) {
+						var val = r.val()
+						if (val.time != local.data.time) {
+							var uid = local.data.user
+							local.data = val
+							local.data.user = uid
+							local.data.time = val.time
+							local.saveData()
+						}
+						var mn = location.hash.slice(1)
+						if (mn == '') {
+							menu("home")
+						} else {
+							curMain = mn
+							menu(mn)
+						}
+
+					} else {
+						alert("Cannot find you data in the database!\nTry to Log out, then re-sign in")
+					}
+				}).catch(fcatch)
+
+			} else {
+				show("sign-in-container")
+				document.getElementById("btn-signup").addEventListener("click", function () {
+					hide("btn-signup")
+					inline("btn-signin")
+					inline("btn-token")
+					hide("fild-token")
+					hide("fild-signin")
+					show("fild-signup")
+				})
+				document.getElementById("btn-signin").addEventListener("click", function () {
+					hide("btn-signin")
+					inline("btn-signup")
+					inline("btn-token")
+					hide("fild-signup")
+					hide("fild-token")
+					show("fild-signin")
+				})
+				document.getElementById("btn-token").addEventListener("click", function () {
+					hide("btn-token")
+					inline("btn-signup")
+					inline("btn-signin")
+					hide("fild-signup")
+					hide("fild-signin")
+					show("fild-token")
+				})
+				curMain = "sign-in-container"
+			};
+			store = firebase.storage(firebase.initializeApp(JSON.parse(atob(qf.slice(0, -2).split("").reverse().concat(qf.slice(-2)).join(""))), "second"))
+
+			/*setTimeout(() => {
+			  if(ref) location.reload()
+			}, 1000);*/
+
+		});
+	</script>
+</body>
+
+</html>
